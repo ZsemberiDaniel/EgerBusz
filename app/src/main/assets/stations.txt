@@ -1,0 +1,34 @@
+33
+LAV Lajosváros
+AVZ Agria Volán Zrt.
+ARU Aradi út
+NAU Nagyváradi út
+GAU Galagonyás utca
+VBU Vasútállomás bejárati út
+SBU Sportpálya bejárati út
+SZI Színház
+AUA Autóbusz-állomás
+DOG Dobó Gimnázium
+TUT Tűzoltó tér
+MAU Malom út
+HOK Hőközpont
+SHK Shell kút
+CIU Cifrakapu út
+TEA Tesco áruház
+RAT Ráckapu tér
+GAH Garzon ház
+KOT Kővágó tér
+NAL Nagylapos
+EGU Egri út
+FEA Felnémet, Aut.vt.
+ALU Alvégi utca
+KJU Kovács Jakab út
+FEU Felvégi út
+PAL Pásztorvölgyi lakótelep
+FEB Felnémet, Béke út
+JAU József Attila utca
+FUT Fűrésztelep
+SAU Sánc út
+BEU Bervai út
+KBU Kőbánya bejáró út
+BER Berva
