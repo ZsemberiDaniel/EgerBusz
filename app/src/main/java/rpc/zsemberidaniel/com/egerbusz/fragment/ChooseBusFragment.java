@@ -57,16 +57,19 @@ public class ChooseBusFragment extends Fragment {
 
     private void UpdateListView() {
         Line chosenLine = Lines.getLine(lineSpinner.getSelectedItem().toString());
-        List<String> stationNames;
+        List<String> stationNames = null;
+        boolean withPics;
 
         // No line was chosen
         if (chosenLine == null) {
+            withPics = false;
             stationNames = Stations.getStationNamesInABCOrder();
         } else { // We can use the line that was chosen
-            stationNames = Arrays.asList(chosenLine.getStationNames());
+            withPics = true;
+            // stationNames = Arrays.asList(chosenLine.getStationNames());
         }
 
-        stationListView.setAdapter(new StringAdapter(getActivity(), stationNames));
+        stationListView.setAdapter(new StringAdapter(getActivity(), stationNames, withPics));
     }
 
     /**
