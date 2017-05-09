@@ -2,6 +2,7 @@ package rpc.zsemberidaniel.com.egerbusz.data;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.res.ResourcesCompat;
@@ -25,6 +26,11 @@ public class StringAdapter extends ArrayAdapter<String> {
     private Context context;
     private boolean withPics;
 
+    // The drawables cached that we use
+    private Drawable startDrawable;
+    private Drawable betweenDrawable;
+    private Drawable endDrawable;
+
     /**
      * An adapter for the stations list view.
      * @param context The current context
@@ -35,6 +41,10 @@ public class StringAdapter extends ArrayAdapter<String> {
         super(context, R.layout.station_list_item, objects);
         this.context = context;
         this.withPics = withPics;
+
+        startDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_linestart, null);
+        betweenDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_linebetween, null);
+        endDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_lineend, null);
     }
 
     private static class ViewHolder {
@@ -70,9 +80,9 @@ public class StringAdapter extends ArrayAdapter<String> {
 
         holder.idTextView.setText(currLine);
         if (withPics) {
-            if (position == 0) holder.lineImageView.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_linestart, null));
-            else if (position == getCount() - 1) holder.lineImageView.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_lineend, null));
-            else holder.lineImageView.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_linebetween, null));
+            if (position == 0) holder.lineImageView.setImageDrawable(startDrawable);
+            else if (position == getCount() - 1) holder.lineImageView.setImageDrawable(endDrawable);
+            else holder.lineImageView.setImageDrawable(betweenDrawable);
         }
 
         return convertView;

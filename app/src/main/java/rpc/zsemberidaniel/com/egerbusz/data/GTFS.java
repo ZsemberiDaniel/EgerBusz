@@ -17,11 +17,22 @@ import java.util.ArrayList;
 
 public class GTFS extends SQLiteOpenHelper {
 
+    private static GTFS instance;
+    public static GTFS getInstance() {
+        if (instance == null) throw new NullPointerException("Instance not initialized yet!");
+
+        return instance;
+    }
+    public static void initialize(Context context) {
+        if (instance == null)
+            instance = new GTFS(context);
+    }
+
     private static final String STOPS_FILE_PATH = "stops.txt";
     private static final String ROUTE_FILE_PATH = "routes.txt";
 
     private static final String DATABASE_NAME = "BusTimetable.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 8;
 
     private Context context;
 
@@ -105,14 +116,15 @@ public class GTFS extends SQLiteOpenHelper {
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(route + ".txt")));
 
                 for (int direction = 0; direction <= 1; direction++) {
+                    String headSign = reader.readLine();
                     // For each dayType
-                    for (int i = 0; i <= 3; i++) {
+                    for (int j = 0; j <= 3; j++) {
                         contentValues.clear();
-                        contentValues.put(TripTable.COLUMN_NAME_DAY_TYPE, i);
-                        contentValues.put(TripTable.COLUMN_NAME_DIRECTION, 0);
-                        contentValues.put(TripTable.COLUMN_NAME_HEAD_SIGN, reader.readLine());
+                        contentValues.put(TripTable.COLUMN_NAME_DAY_TYPE, j);
+                        contentValues.put(TripTable.COLUMN_NAME_DIRECTION, direction);
+                        contentValues.put(TripTable.COLUMN_NAME_HEAD_SIGN, headSign);
                         contentValues.put(TripTable.COLUMN_NAME_ROUTE_ID, route);
-                        contentValues.put(TripTable.COLUMN_NAME_ID, route + i + direction);
+                        contentValues.put(TripTable.COLUMN_NAME_ID, route + j + direction);
                         database.insert(TripTable.TABLE_NAME, null, contentValues);
                     }
 
@@ -129,42 +141,44 @@ public class GTFS extends SQLiteOpenHelper {
                     String[] lineWords;
                     int lineCounter = 0, hour = 0, type = 0;
 
-                    while ((line = reader.readLine()) != null) {
-                        lineCounter++;
+                    while ((line = reader.readLine()) != null && !line.equals("")) {
+                        // no buses in this category so don't do anything
+                        if (!line.equals("-")) {
+                            // The very first line of an hour: hour:type
+                            if (lineCounter % 5 == 0) {
+                                lineWords = line.split(":");
+                                hour = Integer.valueOf(lineWords[0]);
+                                type = Integer.valueOf(lineWords[1]) - 1;
+                            } else { // The other lines: min,min,min,min (...)
+                                lineWords = line.split(",");
 
-                        // no buses in this category
-                        if (line.equals("-")) continue;
+                                // Go through all stops and add them to the stop_time table with the correct time
+                                for (int i = 0; i < stops.length; i++) {
+                                    contentValues.clear();
+                                    contentValues.put(StopTimeTable.COLUMN_NAME_STOP_ID, stops[i]);
+                                    contentValues.put(StopTimeTable.COLUMN_NAME_TRIP_ID, route + (lineCounter % 5 - 1) + direction);
+                                    contentValues.put(StopTimeTable.COLUMN_NAME_STOP_SEQUENCE, i);
 
-                        // The very first line of an hour: hour:type
-                        if (lineCounter % 5 == 1) {
-                            lineWords = line.split(":");
-                            hour = Integer.valueOf(lineWords[0]);
-                            type = Integer.valueOf(lineWords[1]);
-                        } else { // The other lines: min,min,min,min (...)
-                            lineWords = line.split(",");
+                                    // Also go through all the minutes
+                                    for (int k = 0; k < lineWords.length; k++) {
+                                        // remove minutes and hours cause they are the only ones that change
+                                        contentValues.remove(StopTimeTable.COLUMN_NAME_HOUR);
+                                        contentValues.remove(StopTimeTable.COLUMN_NAME_MINUTE);
 
-                            // Go through all stops and add them to the stop_time table with the correct time
-                            for (int i = 0; i < stops.length; i++) {
-                                contentValues.clear();
-                                contentValues.put(StopTimeTable.COLUMN_NAME_STOP_ID, stops[i]);
-                                contentValues.put(StopTimeTable.COLUMN_NAME_TRIP_ID, route + (lineCounter % 5 - 2) + direction);
-                                contentValues.put(StopTimeTable.COLUMN_NAME_STOP_SEQUENCE, i);
+                                        // So change them
+                                        int minutes = Integer.valueOf(lineWords[k]) + types[type][i];
+                                        // if the minute goes above 60 we need to add Math.floor(minutes / 60d) to hour
+                                        contentValues.put(StopTimeTable.COLUMN_NAME_HOUR, Math.floor(minutes / 60d) + hour);
+                                        // if minute goes above 60 we need to trim it down to [0;60[
+                                        contentValues.put(StopTimeTable.COLUMN_NAME_MINUTE, minutes % 60);
 
-                                // Also go through all the minutes
-                                for (int k = 0; k < lineWords.length; k++) {
-                                    // remove minutes and hours cause they are the only ones that change
-                                    contentValues.remove(StopTimeTable.COLUMN_NAME_HOUR);
-                                    contentValues.remove(StopTimeTable.COLUMN_NAME_MINUTE);
-
-                                    // So change them
-                                    int minutes = Integer.valueOf(lineWords[k]) + types[type][i];
-                                    // if the minute goes above 60 we need to add Math.floor(minutes / 60d) to hour
-                                    contentValues.put(StopTimeTable.COLUMN_NAME_HOUR, Math.floor(minutes / 60d) + hour);
-                                    // if minute goes above 60 we need to trim it down to [0;60[
-                                    contentValues.put(StopTimeTable.COLUMN_NAME_MINUTE, minutes % 60);
+                                        database.insert(StopTimeTable.TABLE_NAME, null, contentValues);
+                                    }
                                 }
                             }
                         }
+
+                        lineCounter++;
                     }
                 }
             } catch (IOException e) {
@@ -257,6 +271,11 @@ public class GTFS extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        // TODO For debugging purposes just drop all tables
+        db.execSQL("DROP TABLE IF EXISTS " + StopTable.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + RouteTable.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + StopTimeTable.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TripTable.TABLE_NAME);
+        onCreate(db);
     }
 }
