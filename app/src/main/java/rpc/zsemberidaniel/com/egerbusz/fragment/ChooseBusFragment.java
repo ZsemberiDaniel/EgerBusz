@@ -16,6 +16,7 @@ import java.util.List;
 import rpc.zsemberidaniel.com.egerbusz.R;
 import rpc.zsemberidaniel.com.egerbusz.data.GTFS;
 import rpc.zsemberidaniel.com.egerbusz.data.StringAdapter;
+import rpc.zsemberidaniel.com.egerbusz.data.TodayType;
 
 /**
  * Created by zsemberi.daniel on 2017. 05. 04..
@@ -84,6 +85,8 @@ public class ChooseBusFragment extends Fragment {
                 " ORDER BY " + GTFS.StopTimeTable.COLUMN_NAME_STOP_SEQUENCE + ";"
                 ,null
             );
+
+            TodayType.getTodayType();
         }
 
         while (stopsCursor.moveToNext())

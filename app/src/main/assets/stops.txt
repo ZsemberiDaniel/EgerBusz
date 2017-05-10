@@ -23,7 +23,7 @@ FEA Felnémet, Aut.vt.
 ALU Alvégi utca
 KJU Kovács Jakab út
 FEU Felvégi út
-PAL Pásztorvölgyi lakótelep
+PAL Pásztorvölgy lakótelep
 FEB Felnémet, Béke út
 JAU József Attila utca
 FUT Fűrésztelep

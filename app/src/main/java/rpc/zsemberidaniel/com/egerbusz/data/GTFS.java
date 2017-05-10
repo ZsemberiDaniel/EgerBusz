@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class GTFS extends SQLiteOpenHelper {
     private static final String ROUTE_FILE_PATH = "routes.txt";
 
     private static final String DATABASE_NAME = "BusTimetable.db";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     private Context context;
 
@@ -114,6 +115,7 @@ public class GTFS extends SQLiteOpenHelper {
         for (String route : routes) {
             try {
                 reader = new BufferedReader(new InputStreamReader(context.getAssets().open(route + ".txt")));
+                Log.i("IO/I", "Reading from " + route + ".txt");
 
                 for (int direction = 0; direction <= 1; direction++) {
                     String headSign = reader.readLine();
