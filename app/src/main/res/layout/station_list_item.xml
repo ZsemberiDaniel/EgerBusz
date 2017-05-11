@@ -20,6 +20,17 @@
         android:textSize="24sp"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/favouriteStarImgView" />
+
+    <ImageView
+        android:id="@+id/favouriteStarImgView"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginRight="6dp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:srcCompat="@drawable/ic_star_border"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="3dp" />
+
 </android.support.constraint.ConstraintLayout>

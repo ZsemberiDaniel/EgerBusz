@@ -1,4 +1,4 @@
-package rpc.zsemberidaniel.com.egerbusz.data;
+package rpc.zsemberidaniel.com.egerbusz.adapter;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,6 +9,7 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -90,6 +91,17 @@ public class StopAdapter extends ArrayAdapter<StopAdapter.StopForAdapter> {
         else holder.lineImageView.setImageDrawable(betweenDrawable);
 
         return convertView;
+    }
+
+    /**
+     * Click listener for the parent class ArrayAdapter
+     */
+    public static class StopOnItemClickListener implements AdapterView.OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        }
     }
 
     /**

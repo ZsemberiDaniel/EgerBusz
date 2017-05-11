@@ -48,3 +48,31 @@ VAS	Vasútállomás
 SZU	Szövetkezet út
 HMK	HM-i kamara
 IPP	Ipari park
+AGR	Agroker
+TRT	Tranzit tüzép
+KU5	Kistályai út 50.
+SKK	Schön Kaev KFT.
+ZFH	ZF Hungaria KFT.
+TIM	Tihaméri malom
+HOU	Homok utca
+MAH	Maklári hóstya
+SZT	Szarvas tér
+EGY	Egyetem
+EGH	Egészségház út
+USZ	Uszoda
+VEV	Vécsey völgy forduló
+ECU	Egri csillagok utca
+EVV	Eger, vár V. MH.
+TTV	Tetemvár út
+BTS	Bazilika (Törvényszék)
+HVT	Hatvani temető
+BGU	Bethlen Gábor út
+PFU	Petőfi út
+GYU	Garay út
+RDU	Radnóti út
+LTU	Laktanya utca
+VMU	Váci Mihály utca
+AJU	Ankli József út
+MIU	Mikes Kelemen út
+VKB	Vak Bottyán út
+KYU	Kisfaludy út

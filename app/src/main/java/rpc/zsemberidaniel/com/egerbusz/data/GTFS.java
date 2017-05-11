@@ -33,7 +33,7 @@ public class GTFS extends SQLiteOpenHelper {
     private static final String ROUTE_FILE_PATH = "routes.txt";
 
     private static final String DATABASE_NAME = "BusTimetable.db";
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 18;
 
     private Context context;
 
@@ -63,6 +63,7 @@ public class GTFS extends SQLiteOpenHelper {
                 contentValues.clear();
                 contentValues.put(StopTable.COLUMN_NAME_ID, line.substring(0, 3));
                 contentValues.put(StopTable.COLUMN_NAME_NAME, line.substring(4));
+                contentValues.put(StopTable.COLUMN_NAME_STARRED, 0);
 
                 database.insert(StopTable.TABLE_NAME, null, contentValues);
             }
@@ -209,11 +210,13 @@ public class GTFS extends SQLiteOpenHelper {
         public static final String TABLE_NAME = "stops";
         public static final String COLUMN_NAME_ID = "id";
         public static final String COLUMN_NAME_NAME = "name";
+        public static final String COLUMN_NAME_STARRED = "starred";
 
         public static final String CMD_CREATE_TABLE =
                         "CREATE TABLE " + TABLE_NAME + " (" +
                         COLUMN_NAME_ID + " TEXT PRIMARY KEY," +
-                        COLUMN_NAME_NAME + " TEXT)";
+                        COLUMN_NAME_NAME + " TEXT, " +
+                        COLUMN_NAME_STARRED + " INTEGER)";
     }
 
     /**
