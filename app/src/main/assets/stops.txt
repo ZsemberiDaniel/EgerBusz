@@ -37,3 +37,14 @@ BAZ Bazilika
 SET Széna tér
 VPU	Veres Péter út
 MKU	Mátyás király út
+KOU	Koháry út 35.
+AGP	Agria Park
+BAU	Bartakovics út
+KIT	Kisasszony temető
+TIH	Tiszti házak
+CSU	Csokonai út
+BKU	Baktai út
+VAS	Vasútállomás
+SZU	Szövetkezet út
+HMK	HM-i kamara
+IPP	Ipari park

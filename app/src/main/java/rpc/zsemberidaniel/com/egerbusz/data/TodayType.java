@@ -3,6 +3,9 @@ package rpc.zsemberidaniel.com.egerbusz.data;
 import android.content.Context;
 import android.util.Log;
 
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,10 +44,10 @@ public class TodayType {
     public static int SZABADNAP = 2;
     public static int MUNKASZUNETI_NAP = 3;
 
-    private static ArrayList<SimpleCalendar> munkaszunetiNapok;
-    private static ArrayList<SimpleCalendar> tanszunetiNapok;
-    private static ArrayList<SimpleCalendar> specialisMunkanap;
-    private static SimpleCalendar[] summerBreak;
+    private static ArrayList<DateTime> munkaszunetiNapok;
+    private static ArrayList<DateTime> tanszunetiNapok;
+    private static ArrayList<DateTime> specialisMunkanap;
+    private static DateTime[] summerBreak;
 
     /**
      * Initializes the special days. Needs to be called at the start of the app every time.
@@ -64,28 +67,28 @@ public class TodayType {
             munkaszunetiNapok = new ArrayList<>();
             tanszunetiNapok = new ArrayList<>();
             specialisMunkanap = new ArrayList<>();
-            summerBreak = new SimpleCalendar[2];
+            summerBreak = new DateTime[2];
 
             String line;
             String[] words;
             while (!(line = reader.readLine()).equals("")) {
                 words = line.split(" ");
-                munkaszunetiNapok.add(new SimpleCalendar(Integer.valueOf(words[0]), Integer.valueOf(words[1])));
+                munkaszunetiNapok.add(new DateTime(year, Integer.valueOf(words[0]), Integer.valueOf(words[1]), 0, 0));
             }
 
             while (!(line = reader.readLine()).equals("")) {
                 words = line.split(" ");
-                tanszunetiNapok.add(new SimpleCalendar(Integer.valueOf(words[0]), Integer.valueOf(words[1])));
+                tanszunetiNapok.add(new DateTime(year, Integer.valueOf(words[0]), Integer.valueOf(words[1]), 0, 0));
             }
 
             while (!(line = reader.readLine()).equals("")) {
                 words = line.split(" ");
-                specialisMunkanap.add(new SimpleCalendar(Integer.valueOf(words[0]), Integer.valueOf(words[1])));
+                specialisMunkanap.add(new DateTime(year, Integer.valueOf(words[0]), Integer.valueOf(words[1]), 0, 0));
             }
 
             for (int i = 0; i < summerBreak.length; i++) {
                 words = reader.readLine().split(" ");
-                summerBreak[i] = new SimpleCalendar(Integer.valueOf(words[0]), Integer.valueOf(words[1]));
+                summerBreak[i] = new DateTime(year, Integer.valueOf(words[0]), Integer.valueOf(words[1]), 0, 0);
             }
         } catch (IOException exception) {
             // TODO file not found fetch it from the server maybe
@@ -104,7 +107,7 @@ public class TodayType {
      * @return It's based on the ints in this class (ISKOLAI_MUNKANAP,  TANSZUNETI_MUNKANAP ...)
      */
     public static int getTodayType() {
-        Calendar today = Calendar.getInstance();
+        DateTime today = DateTime.now();
 
         return getDayType(today);
     }
@@ -113,75 +116,36 @@ public class TodayType {
      * The day type of the given date
      * @return It's based on the ints in this class (ISKOLAI_MUNKANAP,  TANSZUNETI_MUNKANAP ...)
      */
-    public static int getDayType(Calendar date) {
+    public static int getDayType(DateTime date) {
         // first let's go through the days on which we work but we normally wouldn't have to
-        for (SimpleCalendar workingDay : specialisMunkanap)
-            if (workingDay.equals(date))
+        for (DateTime workingDay : specialisMunkanap)
+            if (workingDay.withTimeAtStartOfDay().equals(date.withTimeAtStartOfDay()))
                 return ISKOLAI_MUNKANAP;
 
         // Then we need to get rid of all the munkaszuneti nap-s and the szabadnap-s becaus
         // munkaszuneti nap-s and szabadnap-s override tanszuneti nap-s
 
         // This comes first because if something is a tanszuneti nap it doesn't mean that it's a munkaszunet
-        for (SimpleCalendar munkaSzunetiNap : munkaszunetiNapok)
-            if (munkaSzunetiNap.equals(date))
+        for (DateTime munkaSzunetiNap : munkaszunetiNapok)
+            if (munkaSzunetiNap.withTimeAtStartOfDay().equals(date.withTimeAtStartOfDay()))
                 return MUNKASZUNETI_NAP;
 
         // The day is saturday -> SZABADNAP
-        if (date.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+        if (date.getDayOfWeek() == Calendar.SATURDAY) {
             return SZABADNAP;
-        } else if (date.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+        } else if (date.getDayOfWeek() == Calendar.SUNDAY) {
             return MUNKASZUNETI_NAP;
         }
 
         // At this point there are no munkaszuneti nap-s
-        for (SimpleCalendar tanSzunetiNap : tanszunetiNapok)
-            if (tanSzunetiNap.equals(date))
+        for (DateTime tanSzunetiNap : tanszunetiNapok)
+            if (tanSzunetiNap.withTimeAtStartOfDay().equals(date.withTimeAtStartOfDay()))
                 return TANSZUNETI_MUNKANAP;
 
         // Now comes the summer break
-        if (summerBreak[1].isTheCalendarSmallerOrEqual(date) && !summerBreak[0].isTheCalendarSmaller(date))
+        if (date.isBefore(summerBreak[1]) && date.isAfter(summerBreak[0]))
             return TANSZUNETI_MUNKANAP;
 
         return ISKOLAI_MUNKANAP;
-    }
-
-    /**
-     * Simple calendar for providing month and date storage
-     */
-    private static class SimpleCalendar {
-        private int month;
-        public int getMonth() { return month; }
-        private int day;
-        public int getDay() { return day; }
-
-        public SimpleCalendar(int month, int day) {
-            this.month = month;
-            this.day = day;
-        }
-
-        public boolean isTheCalendarSmallerOrEqual(Calendar calendar) {
-            int month = calendar.get(Calendar.MONTH);
-
-            if (this.month == month) {
-                return calendar.get(Calendar.DAY_OF_MONTH) <= day;
-            } else {
-                return month <= this.month;
-            }
-        }
-
-        public boolean isTheCalendarSmaller(Calendar calendar) {
-            int month = calendar.get(Calendar.MONTH);
-
-            if (this.month == month) {
-                return calendar.get(Calendar.DAY_OF_MONTH) < day;
-            } else {
-                return month < this.month;
-            }
-        }
-
-        public boolean equals(Calendar calendar) {
-            return (int) calendar.get(Calendar.MONTH) == (month - 1) && calendar.get(Calendar.DAY_OF_MONTH) == day;
-        }
     }
 }

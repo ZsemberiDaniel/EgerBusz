@@ -1,6 +1,5 @@
 package rpc.zsemberidaniel.com.egerbusz.fragment;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,14 +7,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import rpc.zsemberidaniel.com.egerbusz.R;
 import rpc.zsemberidaniel.com.egerbusz.data.GTFS;
-import rpc.zsemberidaniel.com.egerbusz.data.StringAdapter;
+import rpc.zsemberidaniel.com.egerbusz.data.StopAdapter;
 import rpc.zsemberidaniel.com.egerbusz.data.TodayType;
 
 /**
@@ -47,12 +52,10 @@ public class ChooseBusFragment extends Fragment {
 
     public void updateListView(String selected) {
         Cursor stopsCursor;
-        List<String> stationNames = new ArrayList<>();
-        boolean withPics;
 
         // Nothing is selected so show everything in alphabetical order
         if (selected.equals(getResources().getString(R.string.NoneText))) {
-            withPics = false;
+            List<String> stationNames = new ArrayList<>();
 
             // Get data from the Stop table
             stopsCursor = GTFS.getInstance().getReadableDatabase().query(
@@ -61,9 +64,13 @@ public class ChooseBusFragment extends Fragment {
                     null, null, null, null,
                     GTFS.StopTable.COLUMN_NAME_NAME
             );
-        } else { // A particular route is selected so show that in the correct order
-            withPics = true;
 
+            while (stopsCursor.moveToNext())
+                stationNames.add(stopsCursor.getString(stopsCursor.getColumnIndex(GTFS.StopTable.COLUMN_NAME_NAME)));
+            stopsCursor.close();
+
+            stationListView.setAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, stationNames));
+        } else { // A particular route is selected so show that in the correct order
             // Set the correct head sign text
             Cursor headSignCursor = GTFS.getInstance().getReadableDatabase().query(
                     true,
@@ -73,25 +80,70 @@ public class ChooseBusFragment extends Fragment {
                     new String[] { selected, String.valueOf(direction) },
                     null, null, null, null
             );
-            headSignCursor.moveToNext();
-            headSignText = headSignCursor.getString(headSignCursor.getColumnIndex(GTFS.TripTable.COLUMN_NAME_HEAD_SIGN));
+            // We have a head sign
+            if (headSignCursor.moveToNext()) {
+                headSignText = headSignCursor.getString(headSignCursor.getColumnIndex(GTFS.TripTable.COLUMN_NAME_HEAD_SIGN));
+            } else {
+                // if we don't have a head sign we have no route this way
+                headSignText = "";
+                headSignCursor.close();
 
+                stationListView.setAdapter(null);
+                return;
+            }
+            headSignCursor.close();
+
+            // Select all stops from the given route
             stopsCursor =  GTFS.getInstance().getReadableDatabase().rawQuery(
-                "SELECT DISTINCT " + GTFS.StopTable.COLUMN_NAME_NAME +
+                "SELECT DISTINCT " + GTFS.StopTable.COLUMN_NAME_NAME + ", " + GTFS.StopTable.COLUMN_NAME_ID +
                 " FROM " + GTFS.StopTimeTable.TABLE_NAME + " INNER JOIN " + GTFS.StopTable.TABLE_NAME +
                 " ON " + GTFS.StopTimeTable.TABLE_NAME + "." + GTFS.StopTimeTable.COLUMN_NAME_STOP_ID +
                         "=" + GTFS.StopTable.TABLE_NAME + "." + GTFS.StopTable.COLUMN_NAME_ID +
-                " WHERE " + GTFS.StopTimeTable.COLUMN_NAME_TRIP_ID + " = '" + selected + "0" + direction + "'" +
+                " WHERE " + GTFS.StopTimeTable.COLUMN_NAME_TRIP_ID + " = '" + selected + "0" + direction + "' OR " +
+                        GTFS.StopTimeTable.COLUMN_NAME_TRIP_ID + " = '" + selected + "1" + direction + "' OR " +
+                        GTFS.StopTimeTable.COLUMN_NAME_TRIP_ID + " = '" + selected + "2" + direction + "' OR " +
+                        GTFS.StopTimeTable.COLUMN_NAME_TRIP_ID + " = '" + selected + "3" + direction + "' " +
                 " ORDER BY " + GTFS.StopTimeTable.COLUMN_NAME_STOP_SEQUENCE + ";"
                 ,null
             );
 
-            TodayType.getTodayType();
-        }
+            ArrayList<StopAdapter.StopForAdapter> stations = new ArrayList<>();
 
-        while (stopsCursor.moveToNext())
-            stationNames.add(stopsCursor.getString(stopsCursor.getColumnIndex(GTFS.StopTable.COLUMN_NAME_NAME)));
-        stopsCursor.close();
-        stationListView.setAdapter(new StringAdapter(getActivity(), stationNames, withPics));
+            Cursor timeCursor;
+            DateTime today = DateTime.now();
+            int currentDayType = TodayType.getTodayType();
+            while (stopsCursor.moveToNext()) {
+                String stopId = stopsCursor.getString(stopsCursor.getColumnIndex(GTFS.StopTable.COLUMN_NAME_ID));
+
+                // Get the list of times for the given stop, direction and dayType and only after the now time
+                timeCursor = GTFS.getInstance().getReadableDatabase().query(
+                        GTFS.StopTimeTable.TABLE_NAME,
+                        new String[] { GTFS.StopTimeTable.COLUMN_NAME_HOUR, GTFS.StopTimeTable.COLUMN_NAME_MINUTE },
+                        GTFS.StopTimeTable.COLUMN_NAME_TRIP_ID + " = ? AND " + GTFS.StopTimeTable.COLUMN_NAME_STOP_ID + " = ? AND " + GTFS.StopTimeTable.COLUMN_NAME_HOUR + " >= ? AND " + GTFS.StopTimeTable.COLUMN_NAME_MINUTE + " >= ?",
+                        new String[] { selected + currentDayType + direction, stopId, String.valueOf(today.getHourOfDay()), String.valueOf(today.getMinuteOfHour()) },
+                        null, null,
+                        GTFS.StopTimeTable.COLUMN_NAME_STOP_SEQUENCE
+                );
+
+                StopAdapter.StopForAdapter stopForAdapter;
+                // Get only the very first time and display that
+                if (timeCursor.moveToNext()) {
+                    stopForAdapter = new StopAdapter.StopForAdapter(
+                            stopsCursor.getString(stopsCursor.getColumnIndex(GTFS.StopTable.COLUMN_NAME_NAME)),
+                            timeCursor.getInt(timeCursor.getColumnIndex(GTFS.StopTimeTable.COLUMN_NAME_HOUR)),
+                            timeCursor.getInt(timeCursor.getColumnIndex(GTFS.StopTimeTable.COLUMN_NAME_MINUTE))
+                    );
+                } else { // if there are no more buses today then don't use the time
+                    stopForAdapter = new StopAdapter.StopForAdapter(
+                            stopsCursor.getString(stopsCursor.getColumnIndex(GTFS.StopTable.COLUMN_NAME_NAME)));
+                }
+                timeCursor.close();
+
+                stations.add(stopForAdapter);
+            }
+            stopsCursor.close();
+
+            stationListView.setAdapter(new StopAdapter(getActivity(), stations));
+        }
     }
 }

@@ -33,7 +33,7 @@ public class GTFS extends SQLiteOpenHelper {
     private static final String ROUTE_FILE_PATH = "routes.txt";
 
     private static final String DATABASE_NAME = "BusTimetable.db";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 16;
 
     private Context context;
 
@@ -119,6 +119,9 @@ public class GTFS extends SQLiteOpenHelper {
 
                 for (int direction = 0; direction <= 1; direction++) {
                     String headSign = reader.readLine();
+                    // If head sign is - then there is no route here
+                    if (headSign.equals("-")) continue;
+
                     // For each dayType
                     for (int j = 0; j <= 3; j++) {
                         contentValues.clear();

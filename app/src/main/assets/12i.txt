@@ -1,0 +1,21 @@
+Autóbusz-állomás, 9. kocsiállás - Volán telep (Gyorsjárat)
+4
+AUA
+GAU
+NAU
+AVZ
+0
+7
+9
+10
+0
+7
+9
+10
+07:1
+30
+-
+-
+-
+
+-
