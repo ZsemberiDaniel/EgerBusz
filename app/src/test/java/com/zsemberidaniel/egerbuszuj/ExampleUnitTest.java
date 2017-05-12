@@ -1,4 +1,4 @@
-package rpc.zsemberidaniel.com.egerbusz;
+package com.zsemberidaniel.egerbuszuj;
 
 import org.junit.Test;
 

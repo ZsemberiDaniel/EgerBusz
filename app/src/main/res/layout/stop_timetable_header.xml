@@ -8,10 +8,10 @@
     <TextView
         android:id="@+id/routeTextView"
         android:layout_width="wrap_content"
-        android:layout_height="44dp"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="0dp"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:text="12 - Lajosváros felé"
         android:textAppearance="@android:style/TextAppearance.Material.Headline"
         android:textStyle="bold"

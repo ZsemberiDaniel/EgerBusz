@@ -1,4 +1,4 @@
-package rpc.zsemberidaniel.com.egerbusz;
+package com.zsemberidaniel.egerbuszuj;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("rpc.zsemberidaniel.com.egerbusz", appContext.getPackageName());
+        assertEquals("com.zsemberidaniel.egerbuszuj", appContext.getPackageName());
     }
 }

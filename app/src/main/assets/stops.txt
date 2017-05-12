@@ -76,3 +76,6 @@ AJU	Ankli József út
 MIU	Mikes Kelemen út
 VKB	Vak Bottyán út
 KYU	Kisfaludy út
+SAS	Sas út
+LDU	Lájer Dezső utca
+MLU	Mocsáry L. út

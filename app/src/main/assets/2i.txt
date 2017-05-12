@@ -1,0 +1,24 @@
+Autóbusz-állomás (helyi járati megálló) - Szalapart
+5
+AUA
+DOG
+TUT
+ISK
+SZA
+0
+2
+4
+6
+7
+0
+2
+4
+6
+7
+07:1
+30
+-
+-
+-
+
+-
