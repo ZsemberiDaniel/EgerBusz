@@ -7,23 +7,23 @@
     android:weightSum="1">
 
     <TextView
-        android:id="@+id/lineIdText"
+        android:id="@+id/stopNameText"
         android:layout_width="0dp"
         android:layout_height="36dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="0dp"
         android:layout_weight="0.04"
         android:gravity="center_vertical"
         android:text="TextView"
         android:textColor="@android:color/black"
         android:textSize="24sp"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="0dp"
-        app:layout_constraintLeft_toRightOf="@+id/lineImageView"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintRight_toLeftOf="@+id/lineNextTime"
-        android:layout_marginRight="8dp" />
+        app:layout_constraintLeft_toRightOf="@+id/stopImageView"
+        app:layout_constraintRight_toLeftOf="@+id/stopNextTime"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/lineImageView"
+        android:id="@+id/stopImageView"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:layout_marginLeft="0dp"
@@ -34,7 +34,7 @@
         app:srcCompat="@drawable/ic_linebetween" />
 
     <TextView
-        android:id="@+id/lineNextTime"
+        android:id="@+id/stopNextTime"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
         android:layout_marginRight="8dp"

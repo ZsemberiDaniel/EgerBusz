@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/colorButtonNormal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/letterTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingLeft="8dp"
+            android:text="A"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+            android:textColor="?android:attr/colorControlNormal"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            tools:layout_editor_absoluteY="-1dp" />
+    </android.support.constraint.ConstraintLayout>
+</RelativeLayout>

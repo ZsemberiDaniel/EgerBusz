@@ -5,6 +5,6 @@
     android:id="@+id/mainViewPager"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="rpc.zsemberidaniel.com.egerbusz.activity.MainActivity">
+    tools:context="com.zsemberidaniel.egerbuszuj.activities.MainActivity">
 
 </android.support.v4.view.ViewPager>

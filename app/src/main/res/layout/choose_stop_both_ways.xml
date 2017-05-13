@@ -37,7 +37,7 @@
         android:layout_marginTop="8dp" />
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/chooseBusBothWaysViewPager"
+        android:id="@+id/chooseStopBothWaysViewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
@@ -50,7 +50,7 @@
         app:layout_constraintTop_toBottomOf="@+id/lineSpinner">
 
         <android.support.design.widget.TabLayout
-            android:id="@+id/chooseBusBothWaysTabLayout"
+            android:id="@+id/chooseStopBothWaysTabLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"

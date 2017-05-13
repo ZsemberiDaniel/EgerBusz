@@ -2,6 +2,7 @@ package com.zsemberidaniel.egerbuszuj.realm;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.zsemberidaniel.egerbuszuj.StaticStrings;
@@ -21,30 +22,33 @@ import io.realm.Realm;
  * Created by zsemberi.daniel on 2017. 05. 12..
  */
 
-public class FileToRealm {
+public class FileToRealm extends AsyncTask<Context, Void, Void> {
 
     private static final String PREF_IS_FILLED = "isRealmFilled";
 
     private static final String STOPS_FILE_PATH = "stops.txt";
     private static final String ROUTE_FILE_PATH = "routes.txt";
 
-    public static void init(final Context context) {
+    @Override
+    protected Void doInBackground(Context... contexts) {
+        final Context context = contexts[0];
+
         // if we have already filled the realm don't fill it again
         SharedPreferences preferences = context.getSharedPreferences(StaticStrings.PREFS, 0);
-        if (preferences.getBoolean(PREF_IS_FILLED, false)) {
-            return;
+        if (!preferences.getBoolean(PREF_IS_FILLED, false)) {
+            Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+
+                @Override
+                public void execute(Realm realm) {
+                    fillRealm(realm, context);
+                }
+            });
+
+            // indicate that we filled the realm
+            preferences.edit().putBoolean(PREF_IS_FILLED, true).apply();
         }
 
-        Realm.getDefaultInstance().executeTransactionAsync(new Realm.Transaction() {
-
-            @Override
-            public void execute(Realm realm) {
-                fillRealm(realm, context);
-            }
-        });
-
-        // indicate that we filled the realm
-        preferences.edit().putBoolean(PREF_IS_FILLED, true).apply();
+        return null;
     }
 
     private static void fillRealm(Realm realm, Context context) {
@@ -191,5 +195,4 @@ public class FileToRealm {
             }
         }
     }
-
 }
