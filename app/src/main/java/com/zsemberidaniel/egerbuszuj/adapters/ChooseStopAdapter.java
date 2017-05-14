@@ -1,32 +1,94 @@
 package com.zsemberidaniel.egerbuszuj.adapters;
 
-import android.util.ArraySet;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zsemberidaniel.egerbuszuj.R;
 import com.zsemberidaniel.egerbuszuj.realm.objects.Stop;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import eu.davidea.flexibleadapter.FlexibleAdapter;
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem;
 import eu.davidea.flexibleadapter.items.AbstractSectionableItem;
 import eu.davidea.flexibleadapter.items.IFilterable;
 import eu.davidea.viewholders.FlexibleViewHolder;
+import io.realm.Realm;
 
 /**
  * Created by zsemberi.daniel on 2017. 05. 12..
  */
 
-public class ChooseStopAdapter {
+public class ChooseStopAdapter extends FlexibleAdapter<ChooseStopAdapter.ChooseStopItem> {
+
+    private List<ChooseStopItem> items;
+
+    private String filter = "";
+
+    public ChooseStopAdapter(@Nullable List<ChooseStopItem> items) {
+        super(new ArrayList<>(items));
+        this.items = items;
+    }
+
+    /**
+     * Updates the starred attribute of the ChooseStopItems, sorts them, then updates the display as well
+     * If it is filtered it will remove the filter and update the whole data set
+     */
+    private void updateAndSortDataSet() {
+        // remove filter because this function will take the whole list from the constructor into consideration
+        if (isFiltered()) {
+            setSearchText("");
+        }
+
+        // Update starred
+        Realm realm = Realm.getDefaultInstance();
+        for (int i = 0; i < items.size(); i++)
+            items.get(i).setStarred(realm.where(Stop.class).equalTo(Stop.CN_ID, items.get(i).getStopId())
+                    .findFirst().isStarred());
+        realm.close();
+
+        // sort
+        Collections.sort(items);
+
+        // update display
+        setNotifyMoveOfFilteredItems(true);
+        super.updateDataSet(new ArrayList<>(items), true);
+    }
+
+    /**
+     * @return Is the FlexibleAdapter filtered in any way?
+     */
+    public boolean isFiltered() {
+        return !filter.equals("");
+    }
+
+    @Override
+    public void setSearchText(String searchText) {
+        this.filter = searchText;
+
+        super.setSearchText(searchText);
+    }
+
+    @Override
+    protected void onPostFilter() {
+        super.onPostFilter();
+
+        // update and sort the data set in case the user starred a stop
+        if (filter.equals(""))
+            updateAndSortDataSet();
+    }
 
     /**
      * Generates a header HashMap for the given stops. (Only includes the letter which the stops start
@@ -36,6 +98,7 @@ public class ChooseStopAdapter {
      */
     public static HashMap<Character, ChooseStopHeader> getNewHeaders(List<Stop> stops) {
         Set<Character> characters = new HashSet<>();
+        characters.add('*');
         HashMap<Character, ChooseStopHeader> headers = new HashMap<>();
 
         for (Stop stop : stops) characters.add(stop.getName().toUpperCase().charAt(0));
@@ -54,25 +117,41 @@ public class ChooseStopAdapter {
      * @param headers The letter headers to be added
      * @return The GUI items
      */
-    public static List<ChooseStopItem> convertToChooseStopItems(List<Stop> stops,
-                                                                HashMap<Character, ChooseStopHeader> headers) {
-        List<ChooseStopItem> items = new ArrayList<>(stops.size());
+    public static TreeSet<ChooseStopItem> convertToChooseStopItems(List<Stop> stops,
+                                                                     HashMap<Character, ChooseStopHeader> headers) {
+        TreeSet<ChooseStopItem> items = new TreeSet<>();
+        ChooseStopHeader starHeader = headers.get('*');
 
         for (Stop stop : stops) {
-            items.add(new ChooseStopItem(headers.get(stop.getName().toUpperCase().charAt(0)), stop));
+            items.add(new ChooseStopItem(headers.get(stop.getName().toUpperCase().charAt(0)),
+                    starHeader, stop.getId(), stop.getName(), stop.isStarred()));
         }
 
         return items;
     }
 
     public static class ChooseStopItem extends AbstractSectionableItem<ChooseStopItem.ChooseStopItemViewHolder, ChooseStopHeader>
-                                       implements IFilterable {
+                                       implements IFilterable, Comparable<ChooseStopItem> {
 
-        private Stop stop;
+        private String stopId;
+        public String getStopId() { return stopId; }
+        private String stopName;
+        public String getStopName() { return stopName; }
+        private boolean starred;
+        public boolean isStarred() { return starred; }
+        void setStarred(boolean starred) { this.starred = starred; }
 
-        public ChooseStopItem(ChooseStopHeader header, Stop stop) {
-            super(header);
-            this.stop = stop;
+        private ChooseStopHeader starredHeader;
+        private ChooseStopHeader letterHeader;
+
+        public ChooseStopItem(ChooseStopHeader letterHeader, ChooseStopHeader starredHeader,
+                              String stopId, String stopName, boolean starred) {
+            super(starred ? starredHeader : letterHeader);
+            this.stopId = stopId;
+            this.stopName = stopName;
+            this.starred = starred;
+            this.starredHeader = starredHeader;
+            this.letterHeader = letterHeader;
         }
 
         @Override
@@ -84,7 +163,7 @@ public class ChooseStopAdapter {
         public boolean equals(Object object) {
             if (object instanceof ChooseStopItem) {
                 ChooseStopItem other = (ChooseStopItem) object;
-                return other.stop.getId().equals(stop.getId());
+                return other.stopId.equals(stopId);
             }
 
             return false;
@@ -92,7 +171,7 @@ public class ChooseStopAdapter {
 
         @Override
         public int hashCode() {
-            return stop.getId().hashCode();
+            return stopId.hashCode();
         }
 
         @Override
@@ -103,28 +182,95 @@ public class ChooseStopAdapter {
         @Override
         public ChooseStopItemViewHolder createViewHolder(FlexibleAdapter adapter, LayoutInflater inflater,
                                                          ViewGroup parent) {
-            return new ChooseStopItemViewHolder(inflater.inflate(getLayoutRes(), parent, false), adapter);
+            ChooseStopItemViewHolder viewHolder =
+                    new ChooseStopItemViewHolder(inflater.inflate(getLayoutRes(), parent, false), adapter);
+
+            return viewHolder;
         }
 
         @Override
-        public void bindViewHolder(FlexibleAdapter adapter, ChooseStopItemViewHolder holder, int position,
-                                   List payloads) {
-            holder.stopNameTextView.setText(stop.getName());
+        public void bindViewHolder(final FlexibleAdapter adapter, final ChooseStopItemViewHolder holder, final int position,
+                                   final List payloads) {
+            holder.stopNameTextView.setText(stopName);
+            setStarredImageCorrectly(holder);
+
+            // setup on click listener for the starred image
+            holder.starredImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Toggle starred in database
+                    Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            Stop stop = realm.where(Stop.class).equalTo(Stop.CN_ID, getStopId()).findFirst();
+
+                            stop.setStarred(!stop.isStarred());
+                        }
+                    });
+
+                    // update the starred boolean here
+                    starred = Realm.getDefaultInstance().where(Stop.class).equalTo(Stop.CN_ID, getStopId())
+                            .findFirst().isStarred();
+
+                    // update display
+                    setStarredImageCorrectly(holder);
+                    if (starred) setHeader(starredHeader);
+                    else setHeader(letterHeader);
+
+                    ChooseStopAdapter chooseStopAdapter = (ChooseStopAdapter) adapter;
+
+                    // only update and sort the data set if it is not filtered because if it is filtered
+                    // it updates it in a way which displays all of the data
+                    if (!chooseStopAdapter.isFiltered())
+                        chooseStopAdapter.updateAndSortDataSet();
+                }
+            });
         }
 
         @Override
         public boolean filter(String constraint) {
-            return stop.getName().contains(constraint);
+            return stopName.toLowerCase().contains(constraint.toLowerCase());
+        }
+
+        /**
+         * Sets the starred image of the given viewHolder correctly based on this class' starred
+         * boolean. It gets the drawable from ResourceCompat
+         * @param viewHolder
+         */
+        private void setStarredImageCorrectly(ChooseStopItemViewHolder viewHolder) {
+            if (viewHolder.starredImageView == null) return;
+
+            if (isStarred()) {
+                viewHolder.starredImageView.setImageDrawable(
+                        ResourcesCompat.getDrawable(viewHolder.starredImageView.getResources(),
+                                R.drawable.ic_star, null)
+                );
+            } else {
+                viewHolder.starredImageView.setImageDrawable(
+                        ResourcesCompat.getDrawable(viewHolder.starredImageView.getResources(),
+                                R.drawable.ic_star_border, null)
+                );
+            }
+        }
+
+        @Override
+        public int compareTo(@NonNull ChooseStopItem o) {
+            if (o.starred && !starred) return 1;
+            if (starred && !o.starred) return -1;
+
+            return -o.stopName.compareTo(stopName);
         }
 
         public static class ChooseStopItemViewHolder extends FlexibleViewHolder {
 
             public TextView stopNameTextView;
+            public ImageView starredImageView;
 
             public ChooseStopItemViewHolder(View view, FlexibleAdapter adapter) {
                 super(view, adapter, false);
 
                 stopNameTextView = (TextView) view.findViewById(R.id.stopNameText);
+                starredImageView = (ImageView) view.findViewById(R.id.starredImgView);
             }
         }
     }
