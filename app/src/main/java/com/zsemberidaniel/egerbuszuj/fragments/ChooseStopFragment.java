@@ -1,5 +1,6 @@
 package com.zsemberidaniel.egerbuszuj.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.zsemberidaniel.egerbuszuj.R;
+import com.zsemberidaniel.egerbuszuj.activities.TimetableActivity;
 import com.zsemberidaniel.egerbuszuj.adapters.ChooseStopAdapter;
 import com.zsemberidaniel.egerbuszuj.realm.objects.Stop;
 
@@ -66,7 +68,9 @@ public class ChooseStopFragment extends Fragment {
             public boolean onItemClick(int position) {
                 ChooseStopAdapter.ChooseStopItem item = allStopsAdapter.getItem(position);
 
-
+                Intent intent = new Intent(getContext(), TimetableActivity.class);
+                intent.putExtra(TimetableActivity.ARG_STOP_ID, item.getStopId());
+                getContext().startActivity(intent);
                 return false;
             }
         });

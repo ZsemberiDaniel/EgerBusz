@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.zsemberidaniel.egerbuszuj.StaticStrings;
+import com.zsemberidaniel.egerbuszuj.misc.StaticStrings;
 import com.zsemberidaniel.egerbuszuj.realm.objects.Route;
 import com.zsemberidaniel.egerbuszuj.realm.objects.Stop;
 import com.zsemberidaniel.egerbuszuj.realm.objects.StopTime;

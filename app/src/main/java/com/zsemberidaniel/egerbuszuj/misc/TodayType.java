@@ -1,10 +1,11 @@
-package com.zsemberidaniel.egerbuszuj;
+package com.zsemberidaniel.egerbuszuj.misc;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 
 import java.io.BufferedReader;
@@ -139,9 +140,9 @@ public class TodayType extends AsyncTask<Context, Void, Void> {
                 return MUNKASZUNETI_NAP;
 
         // The day is saturday -> SZABADNAP
-        if (date.getDayOfWeek() == Calendar.SATURDAY) {
+        if (date.getDayOfWeek() == DateTimeConstants.SATURDAY) {
             return SZABADNAP;
-        } else if (date.getDayOfWeek() == Calendar.SUNDAY) {
+        } else if (date.getDayOfWeek() == DateTimeConstants.SUNDAY) {
             return MUNKASZUNETI_NAP;
         }
 

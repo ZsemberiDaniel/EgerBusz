@@ -12,7 +12,7 @@ import android.view.MenuItem;
 
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.zsemberidaniel.egerbuszuj.R;
-import com.zsemberidaniel.egerbuszuj.TodayType;
+import com.zsemberidaniel.egerbuszuj.misc.TodayType;
 import com.zsemberidaniel.egerbuszuj.fragments.ChooseStopFragment;
 import com.zsemberidaniel.egerbuszuj.realm.FileToRealm;
 
