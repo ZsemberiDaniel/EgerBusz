@@ -8,4 +8,6 @@
     <string name="ChooseLineText">Vonal</string>
     <string name="NoneText">Egyik sem</string>
     <string name="headsignSeparator">-</string>
+    <string name="minuteShort">p</string>
+    <string name="hourShort">ó</string>
 </resources>

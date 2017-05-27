@@ -9,11 +9,22 @@
     tools:elevation="@dimen/cardview_default_elevation">
 
 
+    <ImageView
+        android:id="@+id/dividerTextView"
+        android:layout_width="0dp"
+        android:layout_height="0.5dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="90dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@android:drawable/divider_horizontal_bright" />
+
     <TextView
         android:id="@+id/routeTextView"
         android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
+        android:layout_height="35dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="4dp"
         android:gravity="center_vertical"
@@ -22,45 +33,45 @@
         android:textColor="@android:color/black"
         android:textSize="30sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteY="23dp"
+        app:layout_constraintBottom_toTopOf="@+id/dividerTextView"
+        android:layout_marginBottom="4dp" />
 
     <TextView
         android:id="@+id/separatorTextView"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="-"
         android:textAppearance="@android:style/TextAppearance.Material.Headline"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/routeTextView"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/dividerTextView" />
 
     <TextView
         android:id="@+id/headsignTextView"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Lajosváros felé"
         android:textAppearance="@android:style/TextAppearance.Material.Headline"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/imageView"
+        app:layout_constraintEnd_toStartOf="@+id/dropdownImageView"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/separatorTextView"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintBottom_toTopOf="@+id/dividerTextView"
+        android:layout_marginBottom="4dp" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/dropdownImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"

@@ -27,7 +27,8 @@ import io.realm.Realm
  * Created by zsemberi.daniel on 2017. 05. 12..
  */
 
-class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem>) : FlexibleAdapter<ChooseStopAdapter.ChooseStopItem>(ArrayList(items!!)) {
+class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem>)
+    : FlexibleAdapter<ChooseStopAdapter.ChooseStopItem>(ArrayList(items)) {
 
     private var filter: String = ""
 
@@ -157,13 +158,13 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
          */
         private fun setStarredImageCorrectly(viewHolder: ChooseStopItemViewHolder) {
             if (isStarred) {
-                viewHolder.starredImageView!!.setImageDrawable(
-                        ResourcesCompat.getDrawable(viewHolder.starredImageView!!.resources,
+                viewHolder.starredImageView.setImageDrawable(
+                        ResourcesCompat.getDrawable(viewHolder.starredImageView.resources,
                                 R.drawable.ic_star, null)
                 )
             } else {
-                viewHolder.starredImageView!!.setImageDrawable(
-                        ResourcesCompat.getDrawable(viewHolder.starredImageView!!.resources,
+                viewHolder.starredImageView.setImageDrawable(
+                        ResourcesCompat.getDrawable(viewHolder.starredImageView.resources,
                                 R.drawable.ic_star_border, null)
                 )
             }
@@ -209,7 +210,6 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
         }
 
         class ChooseStopHeaderViewHolder(view: View, adapter: FlexibleAdapter<*>) : FlexibleViewHolder(view, adapter, true) {
-
             val letterTextView: TextView = view.findViewById(R.id.letterTextView) as TextView
         }
     }

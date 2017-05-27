@@ -1,25 +1,24 @@
 package com.zsemberidaniel.egerbuszuj.activities
 
 import android.os.Bundle
-import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
+import android.support.v7.widget.*
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.LinearLayout
 
 import com.zsemberidaniel.egerbuszuj.R
+import com.zsemberidaniel.egerbuszuj.adapters.NextUpAdapter
 import com.zsemberidaniel.egerbuszuj.adapters.TimetableAdapter
 import com.zsemberidaniel.egerbuszuj.misc.TodayType
-import com.zsemberidaniel.egerbuszuj.realm.objects.Route
 import com.zsemberidaniel.egerbuszuj.realm.objects.Stop
-
-import java.util.ArrayList
-import java.util.HashMap
+import com.zsemberidaniel.egerbuszuj.realm.objects.StopTime
 
 import io.realm.Realm
+import io.realm.Sort
+import org.joda.time.DateTime
+import org.joda.time.LocalTime
+import java.util.*
 
 /**
  * Created by zsemberi.daniel on 2017. 05. 14..
@@ -36,7 +35,13 @@ class TimetableActivity : AppCompatActivity() {
     private lateinit var layoutManager: LinearLayoutManager
     private lateinit var timetableAdapter: TimetableAdapter
 
+    private lateinit var nextUpRecyclerView: RecyclerView
+    private lateinit var nextUpLayoutManager: LinearLayoutManager
+    private var nextUpAdapter: NextUpAdapter? = null
+
     private var toolbar: Toolbar? = null
+
+    private val updateTimer: Timer = Timer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,22 +58,22 @@ class TimetableActivity : AppCompatActivity() {
         filterRouteID = extras.getString(ARG_ROUTE_ID)
         filterStopID = extras.getString(ARG_STOP_ID)
 
+
+        recyclerView = findViewById(R.id.timetableRecycleView) as RecyclerView
+
+        // improve performance because the content does not change the layout size of the RecyclerView
+        recyclerView.setHasFixedSize(true)
+
+        // use a linear layout manager
+        layoutManager = LinearLayoutManager(applicationContext)
+        recyclerView.layoutManager = layoutManager
+
         if (filterStopID != null) {
-
-            recyclerView = findViewById(R.id.timetableRecycleView) as RecyclerView
-
-            // improve performance because the content does not change the layout size of the RecyclerView
-            recyclerView.setHasFixedSize(true)
-
-            // use a linear layout manager
-            layoutManager = LinearLayoutManager(applicationContext)
-            recyclerView.layoutManager = layoutManager
-
             filterStopName = Realm.getDefaultInstance().where<Stop>(Stop::class.java)
                     .equalTo(Stop.CN_ID, filterStopID).findFirst().name
 
             // Get times in both direction
-            val timesDir1  = TimetableAdapter.getAllTimes(this, filterStopID.toString(), filterRouteID, TodayType.todayType, 0)
+            val timesDir1 = TimetableAdapter.getAllTimes(this, filterStopID.toString(), filterRouteID, TodayType.todayType, 0)
             val timesDir2 = TimetableAdapter.getAllTimes(this, filterStopID.toString(), filterRouteID, TodayType.todayType, 1)
 
             // Get UI items
@@ -83,6 +88,22 @@ class TimetableActivity : AppCompatActivity() {
             // set adapter
             recyclerView.adapter = timetableAdapter
         }
+
+
+        // Next Up Recycler view
+        nextUpRecyclerView = findViewById(R.id.nextUpRecyclerView) as RecyclerView
+        nextUpRecyclerView.setHasFixedSize(true)
+
+        nextUpLayoutManager = LinearLayoutManager(this, OrientationHelper.HORIZONTAL, false)
+        nextUpRecyclerView.layoutManager = nextUpLayoutManager
+
+        updateNextUp(DateTime.now())
+        updateTimer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                updateNextUp(DateTime.now())
+            }
+
+        }, (60 - DateTime.now().secondOfMinute + 3) * 1000L, 60000L)
 
 
         // Toolbar
@@ -118,8 +139,43 @@ class TimetableActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    companion object {
+    override fun onDestroy() {
+        super.onDestroy()
 
+        updateTimer.cancel()
+    }
+
+    /**
+     * Updates the next up cards
+     */
+    fun updateNextUp(currTime: DateTime) {
+        if (filterStopID == null) return
+
+        // Get all times in this stop on this route, today, in both directions
+        // After the currTime hour, sorted by time
+        val times = TimetableAdapter.getRealmQueryFor(filterStopID!!, filterRouteID, TodayType.todayType)
+                .greaterThanOrEqualTo(StopTime.CN_HOUR, currTime.hourOfDay)
+                .greaterThanOrEqualTo(StopTime.CN_MINUTE, currTime.minuteOfHour)
+                .findAll().sort(arrayOf(StopTime.CN_HOUR, StopTime.CN_MINUTE), arrayOf(Sort.ASCENDING, Sort.ASCENDING))
+
+        if (times.size > 0) {
+            val items: MutableList<NextUpAdapter.NextUpItem> = MutableList(Math.min(times.size, 10), {
+                NextUpAdapter.NextUpItem(this, times[it].trip?.route?.id ?: "ERR",
+                        times[it].trip?.headSign?.substring(0, 3)?.toUpperCase() ?: "ERR",
+                        LocalTime(times[it].hour.toInt(), times[it].minute.toInt(), 0))
+            })
+
+            if (nextUpAdapter == null) {
+                nextUpAdapter = NextUpAdapter(items)
+                nextUpRecyclerView.adapter = nextUpAdapter
+            } else {
+                nextUpAdapter?.clear()
+                nextUpAdapter?.addItems(0, items)
+            }
+        }
+    }
+
+    companion object {
         /**
          * Can be passed to this activity as an argument (String).
          * It is a filter for the timetable: what route(s) to show.

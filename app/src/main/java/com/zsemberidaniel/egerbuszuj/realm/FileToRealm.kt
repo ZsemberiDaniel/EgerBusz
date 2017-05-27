@@ -32,8 +32,7 @@ class FileToRealm {
         fun init(context: Context) {
             // if we have already filled the realm don't fill it again
             val preferences = context.getSharedPreferences(StaticStrings.PREFS, 0)
-            // TODO don't refresh realm every frickin time
-            preferences.edit().putBoolean(PREF_IS_FILLED, false).apply()
+            // preferences.edit().putBoolean(PREF_IS_FILLED, false).apply()
             if (!preferences.getBoolean(PREF_IS_FILLED, false)) {
                 Realm.getDefaultInstance().executeTransaction { realm -> realm.deleteAll() }
                 Realm.getDefaultInstance().executeTransaction { realm -> fillRealm(realm, context) }

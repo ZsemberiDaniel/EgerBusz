@@ -3,6 +3,7 @@ package com.zsemberidaniel.egerbuszuj.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.support.annotation.IntRange
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 
 import com.zsemberidaniel.egerbuszuj.R
+import com.zsemberidaniel.egerbuszuj.misc.formatToTwoDigits
 import com.zsemberidaniel.egerbuszuj.realm.objects.Stop
 import com.zsemberidaniel.egerbuszuj.realm.objects.StopTime
 import com.zsemberidaniel.egerbuszuj.realm.objects.Trip
@@ -24,7 +26,9 @@ import eu.davidea.flexibleadapter.items.AbstractSectionableItem
 import eu.davidea.viewholders.ExpandableViewHolder
 import eu.davidea.viewholders.FlexibleViewHolder
 import io.realm.Realm
+import io.realm.RealmQuery
 import io.realm.Sort
+import org.joda.time.DateTime
 
 /**
  * Created by zsemberi.daniel on 2017. 05. 14..
@@ -32,15 +36,58 @@ import io.realm.Sort
 
 class TimetableAdapter(items: List<TimetableAdapter.TimetableHeader>?) : FlexibleAdapter<TimetableAdapter.TimetableHeader>(items) {
 
-    class HourMinutesOutput
+    data class HourMinutesOutput
     /**
      * @param minutes Does NOT copy it
      */
     @JvmOverloads constructor(var hour: Int, var minutes: MutableList<Int> = ArrayList<Int>())
 
-    class TimetableItem(private val context: Context, header: TimetableHeader, private val hourMinutes: HourMinutesOutput) : AbstractSectionableItem<TimetableItem.TimetableItemViewHolder, TimetableHeader>(header) {
+    class TimetableItem(private val context: Context, header: TimetableHeader, private val hourMinutes: HourMinutesOutput)
+        : AbstractSectionableItem<TimetableItem.TimetableItemViewHolder, TimetableHeader>(header) {
 
         private val hashString: String = hourMinutes.hour.toString() + header.fullHeadSign
+        private var viewHolder: TimetableItemViewHolder? = null
+
+        /**
+         * Updates all the textViews based on the currTime
+         */
+        fun updateTextColor(currTime: DateTime) {
+            val normalColor = ContextCompat.getColor(context, R.color.timetableNormalText)
+            val fadedColor = ContextCompat.getColor(context, R.color.timetableFadedText)
+
+            // This hour has been passed in currTime so set everything to faded
+            if (hourMinutes.hour < currTime.hourOfDay) {
+                viewHolder?.hourTextView?.setTextColor(fadedColor)
+
+                if (viewHolder?.minuteTextViews != null)
+                    for (view in viewHolder?.minuteTextViews!!)
+                        view.setTextColor(fadedColor)
+
+                return
+            }
+
+            // Current hour -> we need to check every minute whether it has passed
+            else if (hourMinutes.hour == currTime.hourOfDay) {
+                for (i in 0..hourMinutes.minutes.size - 1) {
+                    if (hourMinutes.minutes[i] <= currTime.minuteOfHour) {
+                        viewHolder?.minuteTextViews?.get(i)?.setTextColor(fadedColor)
+
+                        // We are at the last minute and it has been converted to faded -> the hour can be converted
+                        // because there are no more minutes in it
+                        if (i == hourMinutes.minutes.size - 1) viewHolder?.hourTextView?.setTextColor(fadedColor)
+                    } else { // set all the others to normal color
+                        viewHolder?.minuteTextViews?.get(i)?.setTextColor(normalColor)
+                    }
+                }
+            }
+
+            // if this hour has not passed set it's color to normal
+            else if (hourMinutes.hour > currTime.hourOfDay) {
+                viewHolder?.hourTextView?.setTextColor(normalColor)
+                for (i in 0..hourMinutes.minutes.size - 1)
+                    viewHolder?.minuteTextViews?.get(i)?.setTextColor(normalColor)
+            }
+        }
 
         override fun equals(o: Any?): Boolean {
             if (o is TimetableItem) {
@@ -67,26 +114,20 @@ class TimetableAdapter(items: List<TimetableAdapter.TimetableHeader>?) : Flexibl
         @SuppressLint("SetTextI18n")
         override fun bindViewHolder(adapter: FlexibleAdapter<*>, holder: TimetableItemViewHolder,
                                     position: Int, payloads: List<*>) {
+            viewHolder = holder
             holder.minutesLinearLayout.removeAllViews()
 
-            holder.hourTextView.text = formatToTwoDigit(hourMinutes.hour)
+            holder.hourTextView.text = hourMinutes.hour.formatToTwoDigits()
             holder.minuteTextViews = Array(hourMinutes.minutes.size, { i ->
                 val textView = TextView(context)
-                textView.text = "${formatToTwoDigit(hourMinutes.minutes[i])}${if (i != hourMinutes.minutes.size - 1) ", " else ""}"
+                textView.text = "${hourMinutes.minutes[i].formatToTwoDigits()}${if (i != hourMinutes.minutes.size - 1) ", " else ""}"
 
                 textView
             })
 
-            for (minTextView in holder.minuteTextViews!!)
-                holder.minutesLinearLayout.addView(minTextView)
-        }
+            holder.minuteTextViews?.forEach { minTextView -> holder.minutesLinearLayout.addView(minTextView) }
 
-        /**
-         * Formats a number to two digits. For example 2 -> 02, 5 -> 05, 23 -> 23
-         * If number is above two digits it will just be returned as a string
-         */
-        private fun formatToTwoDigit(t: Int): String {
-            return if (t < 10) "0" + t else t.toString()
+            updateTextColor(DateTime.now())
         }
 
         class TimetableItemViewHolder(view: View, adapter: FlexibleAdapter<*>) : FlexibleViewHolder(view, adapter) {
@@ -194,6 +235,27 @@ class TimetableAdapter(items: List<TimetableAdapter.TimetableHeader>?) : Flexibl
         }
 
         /**
+         * Return a query with all of the StopTimes in [stop] on [route], on [dayType], in [direction]
+         * If direction is null then both directions will be returned
+         */
+        fun getRealmQueryFor(stop: String, route: String?,
+                             @IntRange(from = 0, to = 4) dayType: Int,
+                             @IntRange(from = 0, to = 1) direction: Int? = null): RealmQuery<StopTime> {
+            val realm = Realm.getDefaultInstance()
+            val times = realm.where<StopTime>(StopTime::class.java)
+
+            // Look for stopTimes with the given stop
+            times.equalTo(StopTime.CN_STOP + "." + Stop.CN_ID, stop)
+
+            // Look for stopTimes with the given route, direction and dayType
+            // This can be achieved with the proper trip id because that is made up of all of
+            // that information
+            times.like(StopTime.CN_TRIP + "." + Trip.CN_ID, (route ?: "*") + dayType + (direction ?: "?"))
+
+            return times
+        }
+
+        /**
          * Returns the times a bus is at a stop. If we want we can even specify which bus (route).
          * @param stop The stop for which this function returns the hours and minutes
          * *
@@ -205,28 +267,12 @@ class TimetableAdapter(items: List<TimetableAdapter.TimetableHeader>?) : Flexibl
          * *
          * @return The keys are route ids plus the head sign (so if route is given there will only be one). The value is a list of the hours and minutes.
          */
+        @SuppressLint("Range")
         fun getAllTimes(context: Context, stop: String, route: String?,
                         @IntRange(from = 0, to = 4) dayType: Int,
                         @IntRange(from = 0, to = 1) direction: Int): HashMap<String, List<HourMinutesOutput>>? {
-
-            val realm = Realm.getDefaultInstance()
-            val times = realm.where<StopTime>(StopTime::class.java)
-
-            // Look for stopTimes with the given route, direction and dayType
-            // This can be achieved with the proper trip id because that is made up of all of
-            // that information
-            if (route != null)
-                times.equalTo(StopTime.CN_TRIP + "." + Trip.CN_ID, route + dayType + direction)
-            else
-            // otherwise we'll still need to apply the direction and the dayType
-                times.like(StopTime.CN_TRIP + "." + Trip.CN_ID, "*" + dayType + direction)
-
-            // Look for stopTimes with the given stop
-            times.equalTo(StopTime.CN_STOP + "." + Stop.CN_ID, stop)
-            realm.close()
-
             // Order like this because we want to group by routes then the time
-            var sortedTimes = times.findAll()
+            var sortedTimes = getRealmQueryFor(stop, route, dayType, direction).findAll()
             sortedTimes = sortedTimes.sort(arrayOf(StopTime.CN_TRIP + "." + Trip.CN_ID, StopTime.CN_HOUR, StopTime.CN_MINUTE),
                     arrayOf(Sort.ASCENDING, Sort.ASCENDING, Sort.ASCENDING))
 
@@ -245,7 +291,7 @@ class TimetableAdapter(items: List<TimetableAdapter.TimetableHeader>?) : Flexibl
             var headSign = ""
             var hour: Int
             var min: Int
-            var headsignSeparator: String = context.resources.getString(R.string.headsignSeparator)
+            val headSignSeparator: String = context.resources.getString(R.string.headsignSeparator)
             for (i in sortedTimes.indices) {
                 // examined StopTime attributes
                 routeId = sortedTimes[i].trip?.route?.id!!
@@ -264,7 +310,7 @@ class TimetableAdapter(items: List<TimetableAdapter.TimetableHeader>?) : Flexibl
                 // Start a new route group
                 if (routeId != currentRoute) {
                     // of course first store the current stuff
-                    output.put(currentRoute + headsignSeparator + currentHeadSign, ArrayList(hours))
+                    output.put(currentRoute + headSignSeparator + currentHeadSign, ArrayList(hours))
 
                     hours.clear()
                     currentRoute = routeId
@@ -276,7 +322,7 @@ class TimetableAdapter(items: List<TimetableAdapter.TimetableHeader>?) : Flexibl
 
             // Add the very last ones
             hours.add(currentHourMinutes)
-            output.put(currentRoute + headsignSeparator + headSign, ArrayList(hours))
+            output.put(currentRoute + headSignSeparator + headSign, ArrayList(hours))
 
             return output
         }
