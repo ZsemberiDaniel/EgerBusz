@@ -7,4 +7,5 @@
     <string name="action_settings">Settings</string>
     <string name="ChooseLineText">Vonal</string>
     <string name="NoneText">Egyik sem</string>
+    <string name="headsignSeparator">-</string>
 </resources>

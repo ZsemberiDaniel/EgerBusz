@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 25
@@ -33,6 +34,7 @@ dependencies {
     compile 'eu.davidea:flexible-adapter:5.0.0-rc1'
     compile 'com.miguelcatalan:materialsearchview:1.4.0'
     testCompile 'junit:junit:4.12'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
 
 buildscript {
@@ -44,3 +46,6 @@ buildscript {
     }
 }
 apply plugin: 'realm-android'
+repositories {
+    mavenCentral()
+}
