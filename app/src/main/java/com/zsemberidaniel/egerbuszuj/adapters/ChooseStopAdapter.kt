@@ -78,7 +78,10 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
     }
 
     class ChooseStopItem(private val letterHeader: ChooseStopHeader, private val starredHeader: ChooseStopHeader,
-                         val stopId: String, val stopName: String, starred: Boolean) : AbstractSectionableItem<ChooseStopItem.ChooseStopItemViewHolder, ChooseStopHeader>(if (starred) starredHeader else letterHeader), IFilterable, Comparable<ChooseStopItem> {
+                         val stopId: String, val stopName: String, starred: Boolean)
+                         : AbstractSectionableItem<ChooseStopItem.ChooseStopItemViewHolder, ChooseStopHeader>(if (starred) starredHeader else letterHeader),
+                           IFilterable, Comparable<ChooseStopItem> {
+
         var isStarred: Boolean = false
             internal set
 
@@ -86,32 +89,14 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
             this.isStarred = starred
         }
 
-        override fun isSelectable(): Boolean {
-            return true
-        }
+        override fun equals(`object`: Any?): Boolean =
+                if (`object` is ChooseStopItem) `object`.stopId == stopId else false
 
-        override fun equals(`object`: Any?): Boolean {
-            if (`object` is ChooseStopItem) {
-                return `object`.stopId == stopId
-            }
-
-            return false
-        }
-
-        override fun hashCode(): Int {
-            return stopId.hashCode()
-        }
-
-        override fun getLayoutRes(): Int {
-            return R.layout.stop_list_item
-        }
-
+        override fun hashCode(): Int = stopId.hashCode()
+        override fun getLayoutRes(): Int = R.layout.stop_list_item
         override fun createViewHolder(adapter: FlexibleAdapter<*>, inflater: LayoutInflater?,
-                                      parent: ViewGroup?): ChooseStopItemViewHolder {
-            val viewHolder = ChooseStopItemViewHolder(inflater!!.inflate(layoutRes, parent, false), adapter)
-
-            return viewHolder
-        }
+                                      parent: ViewGroup?): ChooseStopItemViewHolder
+                = ChooseStopItemViewHolder(inflater!!.inflate(layoutRes, parent, false), adapter)
 
         override fun bindViewHolder(adapter: FlexibleAdapter<*>?, holder: ChooseStopItemViewHolder?, position: Int,
                                     payloads: List<*>?) {
@@ -147,9 +132,8 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
             }
         }
 
-        override fun filter(constraint: String): Boolean {
-            return stopName.toLowerCase().contains(constraint.toLowerCase())
-        }
+        override fun filter(constraint: String): Boolean
+                = stopName.toLowerCase().contains(constraint.toLowerCase())
 
         /**
          * Sets the starred image of the given viewHolder correctly based on this class' starred
@@ -159,13 +143,11 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
         private fun setStarredImageCorrectly(viewHolder: ChooseStopItemViewHolder) {
             if (isStarred) {
                 viewHolder.starredImageView.setImageDrawable(
-                        ResourcesCompat.getDrawable(viewHolder.starredImageView.resources,
-                                R.drawable.ic_star, null)
+                        ResourcesCompat.getDrawable(viewHolder.starredImageView.resources, R.drawable.ic_star, null)
                 )
             } else {
                 viewHolder.starredImageView.setImageDrawable(
-                        ResourcesCompat.getDrawable(viewHolder.starredImageView.resources,
-                                R.drawable.ic_star_border, null)
+                        ResourcesCompat.getDrawable(viewHolder.starredImageView.resources, R.drawable.ic_star_border, null)
                 )
             }
         }
@@ -185,25 +167,13 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
 
     class ChooseStopHeader(private val letter: Char) : AbstractHeaderItem<ChooseStopHeader.ChooseStopHeaderViewHolder>() {
 
-        override fun equals(o: Any?): Boolean {
-            if (o is ChooseStopHeader) {
-                return o.letter == letter
-            }
+        override fun equals(o: Any?): Boolean =
+                if (o is ChooseStopHeader) o.letter == letter else false
 
-            return false
-        }
-
-        override fun hashCode(): Int {
-            return letter.toString().hashCode()
-        }
-
-        override fun getLayoutRes(): Int {
-            return R.layout.letter_item_header
-        }
-
-        override fun createViewHolder(adapter: FlexibleAdapter<*>, inflater: LayoutInflater, parent: ViewGroup): ChooseStopHeaderViewHolder {
-            return ChooseStopHeaderViewHolder(inflater.inflate(layoutRes, parent, false), adapter)
-        }
+        override fun hashCode(): Int = letter.toString().hashCode()
+        override fun getLayoutRes(): Int = R.layout.letter_item_header
+        override fun createViewHolder(adapter: FlexibleAdapter<*>, inflater: LayoutInflater, parent: ViewGroup): ChooseStopHeaderViewHolder =
+                ChooseStopHeaderViewHolder(inflater.inflate(layoutRes, parent, false), adapter)
 
         override fun bindViewHolder(adapter: FlexibleAdapter<*>?, holder: ChooseStopHeaderViewHolder, position: Int, payloads: List<*>) {
             holder.letterTextView.text = letter.toString()

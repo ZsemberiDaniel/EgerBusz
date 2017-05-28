@@ -6,12 +6,14 @@ import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.design.widget.TabLayout
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import com.zsemberidaniel.egerbuszuj.R
+import com.zsemberidaniel.egerbuszuj.fragments.BothRouteFragment
 import com.zsemberidaniel.egerbuszuj.misc.TodayType
 import com.zsemberidaniel.egerbuszuj.fragments.ChooseStopFragment
 import com.zsemberidaniel.egerbuszuj.realm.FileToRealm
@@ -23,6 +25,7 @@ import io.realm.Realm
 class MainActivity : AppCompatActivity() {
 
     private lateinit var viewPager: ViewPager
+    private lateinit var tabLayout: TabLayout
     private lateinit var toolbar: Toolbar
     private lateinit var searchView: MaterialSearchView
 
@@ -47,8 +50,11 @@ class MainActivity : AppCompatActivity() {
         FileToRealm.init(this)
 
         viewPager = findViewById(R.id.mainViewPager) as ViewPager
+        tabLayout = findViewById(R.id.bothRouteTabLayout) as TabLayout
         mainPagerAdapter = MainPagerAdapter(supportFragmentManager)
         viewPager.adapter = mainPagerAdapter
+
+        tabLayout.setupWithViewPager(viewPager)
 
         toolbar = findViewById(R.id.mainToolbar) as Toolbar
         setSupportActionBar(toolbar)
@@ -82,16 +88,13 @@ class MainActivity : AppCompatActivity() {
             private set
 
         override fun getCount(): Int {
-            return 1
+            return 2
         }
 
         override fun getItem(position: Int): Fragment? {
             when (position) {
-                0 -> {
-                    chooseStopFragment = ChooseStopFragment()
-
-                    return chooseStopFragment
-                }
+                0 -> return ChooseStopFragment()
+                1 -> return BothRouteFragment()
                 else -> return null
             }
         }

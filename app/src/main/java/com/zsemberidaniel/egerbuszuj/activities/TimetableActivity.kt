@@ -1,11 +1,12 @@
 package com.zsemberidaniel.egerbuszuj.activities
 
 import android.os.Bundle
+import android.support.v4.app.NotificationCompatSideChannelService
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.*
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 
 import com.zsemberidaniel.egerbuszuj.R
 import com.zsemberidaniel.egerbuszuj.adapters.NextUpAdapter
@@ -19,6 +20,7 @@ import io.realm.Sort
 import org.joda.time.DateTime
 import org.joda.time.LocalTime
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Created by zsemberi.daniel on 2017. 05. 14..
@@ -30,6 +32,7 @@ class TimetableActivity : AppCompatActivity() {
 
     private var filterRouteID: String? = null
     private var filterStopID: String? = null
+    private var filterDirection: Int? = null
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var layoutManager: LinearLayoutManager
@@ -57,6 +60,7 @@ class TimetableActivity : AppCompatActivity() {
 
         filterRouteID = extras.getString(ARG_ROUTE_ID)
         filterStopID = extras.getString(ARG_STOP_ID)
+        filterDirection = extras.getInt(ARG_DIRECTION, -1)
 
 
         recyclerView = findViewById(R.id.timetableRecycleView) as RecyclerView
@@ -73,11 +77,22 @@ class TimetableActivity : AppCompatActivity() {
                     .equalTo(Stop.CN_ID, filterStopID).findFirst().name
 
             // Get times in both direction
-            val timesDir1 = TimetableAdapter.getAllTimes(this, filterStopID.toString(), filterRouteID, TodayType.todayType, 0)
-            val timesDir2 = TimetableAdapter.getAllTimes(this, filterStopID.toString(), filterRouteID, TodayType.todayType, 1)
+            val timesDir1: HashMap<String, List<TimetableAdapter.HourMinutesOutput>>? =
+                    if (filterDirection == -1 || filterDirection == 0)
+                        TimetableAdapter.getAllTimes(this, filterStopID.toString(), filterRouteID, TodayType.todayType, 0)
+                    else null
+
+            val timesDir2: HashMap<String, List<TimetableAdapter.HourMinutesOutput>>? =
+                    if (filterDirection == -1 || filterDirection == 1)
+                        TimetableAdapter.getAllTimes(this, filterStopID.toString(), filterRouteID, TodayType.todayType, 1)
+                    else null
+
 
             // Get UI items
-            val items = TimetableAdapter.setupItems(this, timesDir1, timesDir2)
+            val items =
+                    if (timesDir1 == null) TimetableAdapter.setupItems(this, timesDir2)
+                    else if (timesDir2 == null) TimetableAdapter.setupItems(this, timesDir1)
+                    else TimetableAdapter.setupItems(this, timesDir1, timesDir2)
 
             // make adapter
             timetableAdapter = TimetableAdapter(items)
@@ -87,23 +102,33 @@ class TimetableActivity : AppCompatActivity() {
 
             // set adapter
             recyclerView.adapter = timetableAdapter
+
+            // we have a route so we only gonna have one route -> expand it
+            if (filterRouteID != null) {
+                timetableAdapter.expandAll()
+            }
         }
 
 
         // Next Up Recycler view
         nextUpRecyclerView = findViewById(R.id.nextUpRecyclerView) as RecyclerView
-        nextUpRecyclerView.setHasFixedSize(true)
+        // If we don't have a route we can define the Next Up thingy
+        if (filterRouteID == null) {
+            nextUpRecyclerView.setHasFixedSize(true)
 
-        nextUpLayoutManager = LinearLayoutManager(this, OrientationHelper.HORIZONTAL, false)
-        nextUpRecyclerView.layoutManager = nextUpLayoutManager
+            nextUpLayoutManager = LinearLayoutManager(this, OrientationHelper.HORIZONTAL, false)
+            nextUpRecyclerView.layoutManager = nextUpLayoutManager
 
-        updateNextUp(DateTime.now())
-        updateTimer.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                updateNextUp(DateTime.now())
-            }
+            updateNextUp(DateTime.now())
+            updateTimer.scheduleAtFixedRate(object : TimerTask() {
+                override fun run() {
+                    updateNextUp(DateTime.now())
+                }
 
-        }, (60 - DateTime.now().secondOfMinute + 3) * 1000L, 60000L)
+            }, (60 - DateTime.now().secondOfMinute + 3) * 1000L, 60000L)
+        } else { // We have a route so we don't need the Next Up
+            nextUpRecyclerView.visibility = View.GONE
+        }
 
 
         // Toolbar
@@ -159,12 +184,14 @@ class TimetableActivity : AppCompatActivity() {
                 .findAll().sort(arrayOf(StopTime.CN_HOUR, StopTime.CN_MINUTE), arrayOf(Sort.ASCENDING, Sort.ASCENDING))
 
         if (times.size > 0) {
+            // make a list of max 10 NextUpItems
             val items: MutableList<NextUpAdapter.NextUpItem> = MutableList(Math.min(times.size, 10), {
                 NextUpAdapter.NextUpItem(this, times[it].trip?.route?.id ?: "ERR",
                         times[it].trip?.headSign?.substring(0, 3)?.toUpperCase() ?: "ERR",
                         LocalTime(times[it].hour.toInt(), times[it].minute.toInt(), 0))
             })
 
+            // add the items to the adapter
             if (nextUpAdapter == null) {
                 nextUpAdapter = NextUpAdapter(items)
                 nextUpRecyclerView.adapter = nextUpAdapter
@@ -186,5 +213,10 @@ class TimetableActivity : AppCompatActivity() {
          * It is a filter for the timetable: what stop(s) to show.
          */
         val ARG_STOP_ID = "stopID"
+        /**
+         * Can be passed to this activity as an argument (Int).
+         * It is a filter for the timetable: which direction to show
+         */
+        val ARG_DIRECTION = "direction"
     }
 }

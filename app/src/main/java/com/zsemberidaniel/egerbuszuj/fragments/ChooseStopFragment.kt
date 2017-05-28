@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import com.zsemberidaniel.egerbuszuj.R
 import com.zsemberidaniel.egerbuszuj.activities.TimetableActivity
 import com.zsemberidaniel.egerbuszuj.adapters.ChooseStopAdapter
+import com.zsemberidaniel.egerbuszuj.realm.RealmData
 import com.zsemberidaniel.egerbuszuj.realm.objects.Stop
 
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -30,8 +31,8 @@ class ChooseStopFragment : Fragment() {
     private lateinit var allStopsAdapter: FlexibleAdapter<ChooseStopAdapter.ChooseStopItem>
     private lateinit var allStopItems: TreeSet<ChooseStopAdapter.ChooseStopItem>
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater!!.inflate(R.layout.choose_stop, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.choose_stop, container, false)
 
         recyclerView = view.findViewById(R.id.chooseStopRecyclerView) as RecyclerView
 
@@ -43,7 +44,7 @@ class ChooseStopFragment : Fragment() {
         recyclerView.layoutManager = layoutManager
 
         // specify an adapter with all of the stops
-        val allStops = Realm.getDefaultInstance().where<Stop>(Stop::class.java).findAll()
+        val allStops = RealmData.getAllStops()
 
         // Get letter headers
         val headers = ChooseStopAdapter.getNewHeaders(allStops)
@@ -61,7 +62,7 @@ class ChooseStopFragment : Fragment() {
             val intent = Intent(context, TimetableActivity::class.java)
             intent.putExtra(TimetableActivity.ARG_STOP_ID, item.stopId)
             context.startActivity(intent)
-            false
+            true
         })
 
         recyclerView.adapter = allStopsAdapter
