@@ -17,7 +17,7 @@ open class Trip : RealmObject() {
     companion object {
 
         val CN_ID = "id"
-        val CN_ROUTE_ID = "routeId"
+        val CN_ROUTE = "route"
         val CN_DAY_TYPE = "dayType"
         val CN_HEAD_SIGN = "headSign"
         val CN_DIRECTION = "direction"

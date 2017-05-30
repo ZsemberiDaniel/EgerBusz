@@ -11,28 +11,31 @@ import android.view.View
 import com.zsemberidaniel.egerbuszuj.R
 import com.zsemberidaniel.egerbuszuj.adapters.NextUpAdapter
 import com.zsemberidaniel.egerbuszuj.adapters.TimetableAdapter
+import com.zsemberidaniel.egerbuszuj.interfaces.presenters.ITimetablePresenter
+import com.zsemberidaniel.egerbuszuj.interfaces.views.ITimetableView
+import com.zsemberidaniel.egerbuszuj.misc.StaticStrings
 import com.zsemberidaniel.egerbuszuj.misc.TodayType
+import com.zsemberidaniel.egerbuszuj.presenters.TimetablePresenter
+import com.zsemberidaniel.egerbuszuj.realm.objects.Route
 import com.zsemberidaniel.egerbuszuj.realm.objects.Stop
 import com.zsemberidaniel.egerbuszuj.realm.objects.StopTime
 
 import io.realm.Realm
 import io.realm.Sort
 import org.joda.time.DateTime
+import org.joda.time.LocalDate
 import org.joda.time.LocalTime
 import java.util.*
+import kotlin.Comparator
 import kotlin.collections.HashMap
 
 /**
  * Created by zsemberi.daniel on 2017. 05. 14..
  */
 
-class TimetableActivity : AppCompatActivity() {
+class TimetableActivity : AppCompatActivity(), ITimetableView {
 
-    private var filterStopName: String? = null
-
-    private var filterRouteID: String? = null
-    private var filterStopID: String? = null
-    private var filterDirection: Int? = null
+    private lateinit var timetablePresenter: ITimetablePresenter
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var layoutManager: LinearLayoutManager
@@ -40,11 +43,9 @@ class TimetableActivity : AppCompatActivity() {
 
     private lateinit var nextUpRecyclerView: RecyclerView
     private lateinit var nextUpLayoutManager: LinearLayoutManager
-    private var nextUpAdapter: NextUpAdapter? = null
+    private lateinit var nextUpAdapter: NextUpAdapter
 
-    private var toolbar: Toolbar? = null
-
-    private val updateTimer: Timer = Timer()
+    private lateinit var toolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,12 +59,14 @@ class TimetableActivity : AppCompatActivity() {
             extras = savedInstanceState
         }
 
-        filterRouteID = extras.getString(ARG_ROUTE_ID)
-        filterStopID = extras.getString(ARG_STOP_ID)
-        filterDirection = extras.getInt(ARG_DIRECTION, -1)
+        timetablePresenter = TimetablePresenter(this, extras.getString(ARG_ROUTE_ID),
+                extras.getString(ARG_STOP_ID), extras.getInt(ARG_DIRECTION, -1))
 
 
         recyclerView = findViewById(R.id.timetableRecycleView) as RecyclerView
+        nextUpRecyclerView = findViewById(R.id.nextUpRecyclerView) as RecyclerView
+        toolbar = findViewById(R.id.timetableToolbar) as Toolbar
+
 
         // improve performance because the content does not change the layout size of the RecyclerView
         recyclerView.setHasFixedSize(true)
@@ -72,81 +75,33 @@ class TimetableActivity : AppCompatActivity() {
         layoutManager = LinearLayoutManager(applicationContext)
         recyclerView.layoutManager = layoutManager
 
-        if (filterStopID != null) {
-            filterStopName = Realm.getDefaultInstance().where<Stop>(Stop::class.java)
-                    .equalTo(Stop.CN_ID, filterStopID).findFirst().name
-
-            // Get times in both direction
-            val timesDir1: HashMap<String, List<TimetableAdapter.HourMinutesOutput>>? =
-                    if (filterDirection == -1 || filterDirection == 0)
-                        TimetableAdapter.getAllTimes(this, filterStopID.toString(), filterRouteID, TodayType.todayType, 0)
-                    else null
-
-            val timesDir2: HashMap<String, List<TimetableAdapter.HourMinutesOutput>>? =
-                    if (filterDirection == -1 || filterDirection == 1)
-                        TimetableAdapter.getAllTimes(this, filterStopID.toString(), filterRouteID, TodayType.todayType, 1)
-                    else null
-
-
-            // Get UI items
-            val items =
-                    if (timesDir1 == null) TimetableAdapter.setupItems(this, timesDir2)
-                    else if (timesDir2 == null) TimetableAdapter.setupItems(this, timesDir1)
-                    else TimetableAdapter.setupItems(this, timesDir1, timesDir2)
-
-            // make adapter
-            timetableAdapter = TimetableAdapter(items)
-            timetableAdapter.setDisplayHeadersAtStartUp(true)
-            timetableAdapter.setStickyHeaders(true)
-            timetableAdapter.expandItemsAtStartUp()
-
-            // set adapter
-            recyclerView.adapter = timetableAdapter
-
-            // we have a route so we only gonna have one route -> expand it
-            if (filterRouteID != null) {
-                timetableAdapter.expandAll()
-            }
-        }
+        // make adapter
+        timetableAdapter = TimetableAdapter(null)
+        timetableAdapter.setDisplayHeadersAtStartUp(true)
+        timetableAdapter.setStickyHeaders(true)
+        timetableAdapter.expandItemsAtStartUp()
+        // set adapter
+        recyclerView.adapter = timetableAdapter
 
 
         // Next Up Recycler view
-        nextUpRecyclerView = findViewById(R.id.nextUpRecyclerView) as RecyclerView
-        // If we don't have a route we can define the Next Up thingy
-        if (filterRouteID == null) {
-            nextUpRecyclerView.setHasFixedSize(true)
+        nextUpRecyclerView.setHasFixedSize(true)
+        nextUpLayoutManager = LinearLayoutManager(this, OrientationHelper.HORIZONTAL, false)
+        nextUpRecyclerView.layoutManager = nextUpLayoutManager
 
-            nextUpLayoutManager = LinearLayoutManager(this, OrientationHelper.HORIZONTAL, false)
-            nextUpRecyclerView.layoutManager = nextUpLayoutManager
-
-            updateNextUp(DateTime.now())
-            updateTimer.scheduleAtFixedRate(object : TimerTask() {
-                override fun run() {
-                    updateNextUp(DateTime.now())
-                }
-
-            }, (60 - DateTime.now().secondOfMinute + 3) * 1000L, 60000L)
-        } else { // We have a route so we don't need the Next Up
-            nextUpRecyclerView.visibility = View.GONE
-        }
+        nextUpAdapter = NextUpAdapter(null)
+        nextUpRecyclerView.adapter = nextUpAdapter
 
 
         // Toolbar
-        toolbar = findViewById(R.id.timetableToolbar) as Toolbar
         setSupportActionBar(toolbar)
 
         // add back arrow to toolbar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        // also set title
-        if (filterRouteID != null && filterStopID == null) {
-            supportActionBar?.setTitle(filterRouteID)
-        } else if (filterStopID != null && filterRouteID == null) {
-            supportActionBar?.setTitle(filterStopName)
-        } else {
-            supportActionBar?.setTitle(filterStopName + " - " + filterRouteID)
-        }
+
+        timetablePresenter.init()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -167,39 +122,104 @@ class TimetableActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        updateTimer.cancel()
+        timetablePresenter.destroy()
+    }
+
+    override fun showNextUp(nextUpItems: List<StopTime>) {
+        // make a list of max 10 NextUpItems
+        val items: MutableList<NextUpAdapter.NextUpItem> = MutableList(nextUpItems.size, {
+            NextUpAdapter.NextUpItem(this,
+                    nextUpItems[it].trip?.route?.id ?: "ERR",
+                    nextUpItems[it].trip?.headSign?.substring(0, 3)?.toUpperCase() ?: "ERR",
+                    LocalTime(nextUpItems[it].hour.toInt(), nextUpItems[it].minute.toInt(), 0))
+        })
+
+        // add the items to the adapter
+        nextUpAdapter.clear()
+        nextUpAdapter.addItems(0, items)
+    }
+
+    override fun hideNextUp() {
+        nextUpRecyclerView.visibility = View.GONE
     }
 
     /**
-     * Updates the next up cards
+     * Shows the times from the times HashMaps
      */
-    fun updateNextUp(currTime: DateTime) {
-        if (filterStopID == null) return
+    override fun showTimes(vararg times: HashMap<String, List<TimetableAdapter.HourMinutesOutput>>?) {
+        if (times.isEmpty()) return
 
-        // Get all times in this stop on this route, today, in both directions
-        // After the currTime hour, sorted by time
-        val times = TimetableAdapter.getRealmQueryFor(filterStopID!!, filterRouteID, TodayType.todayType)
-                .greaterThanOrEqualTo(StopTime.CN_HOUR, currTime.hourOfDay)
-                .greaterThanOrEqualTo(StopTime.CN_MINUTE, currTime.minuteOfHour)
-                .findAll().sort(arrayOf(StopTime.CN_HOUR, StopTime.CN_MINUTE), arrayOf(Sort.ASCENDING, Sort.ASCENDING))
+        timetableAdapter.clear()
+        timetableAdapter.addItems(0, getTimesHeader(*times)?.toMutableList() ?: List(0, { TimetableAdapter.TimetableHeader("", "", "") }))
+    }
 
-        if (times.size > 0) {
-            // make a list of max 10 NextUpItems
-            val items: MutableList<NextUpAdapter.NextUpItem> = MutableList(Math.min(times.size, 10), {
-                NextUpAdapter.NextUpItem(this, times[it].trip?.route?.id ?: "ERR",
-                        times[it].trip?.headSign?.substring(0, 3)?.toUpperCase() ?: "ERR",
-                        LocalTime(times[it].hour.toInt(), times[it].minute.toInt(), 0))
-            })
+    override fun expandAll() {
+        timetableAdapter.expandAll()
+    }
 
-            // add the items to the adapter
-            if (nextUpAdapter == null) {
-                nextUpAdapter = NextUpAdapter(items)
-                nextUpRecyclerView.adapter = nextUpAdapter
-            } else {
-                nextUpAdapter?.clear()
-                nextUpAdapter?.addItems(0, items)
+    /**
+     * Returns a list with the items from the times HashMap. Also sets up the headers.
+     * @param times An array of the times. The keys are route ids plus the head sign.
+     * *              The value is a list of the hours and minutes. Because of the nature of the method
+     * *              it will modify it so if you want the original back please !!!USE A COPY!!!
+     * *
+     * @return null if times has 0 elements. Otherwise a list of all the items with the correct headers.
+     */
+    private fun getTimesHeader(vararg times: HashMap<String, List<TimetableAdapter.HourMinutesOutput>>?):
+            List<TimetableAdapter.TimetableHeader>? {
+        if (times.isEmpty()) return null
+
+        val output = ArrayList<TimetableAdapter.TimetableHeader>()
+
+        // Move every HashMap to the very first item of the varargs
+        var keyIterator: MutableIterator<String>?
+        var key: String
+        for (i in 1..times.size - 1) {
+            keyIterator = times[i]?.keys?.iterator()
+
+            while (keyIterator != null && keyIterator.hasNext()) {
+                key = keyIterator.next()
+
+                if (times[i]?.getValue(key) != null)
+                    times[0]?.put(key, times[i]?.getValue(key)!!)
             }
         }
+
+        // Now we can treat the first one as a collection of all the others
+        keyIterator = times[0]?.keys?.iterator()
+
+        // First sort the routeIDs so it is easier to find them
+        val sortedKeys: MutableList<String> = MutableList(0, { "" })
+        while (keyIterator != null && keyIterator.hasNext())
+            sortedKeys.add(keyIterator.next())
+
+        // sort by route ids, we need to split the keys because they are id - headSign
+        val routeComp = Route.getRouteComparator()
+        sortedKeys.sortWith(Comparator<String> { o1, o2 ->
+            routeComp.compare(o1.split(StaticStrings.SEPARATOR)[0], o2.split(StaticStrings.SEPARATOR)[0])
+        })
+
+        val separator = StaticStrings.SEPARATOR
+        // Then add the items in order
+        if (times[0]?.keys?.size != null)
+            for (i in 0 until sortedKeys.size) {
+                val routeIDHeadSign = sortedKeys[i]
+                val hours = times[0]?.getValue(routeIDHeadSign)
+                val split = routeIDHeadSign.split(separator)
+
+                val header = TimetableAdapter.TimetableHeader(split[0], split[1], routeIDHeadSign)
+                if (hours != null)
+                    for (k in hours.indices) {
+                        header.addSubItem(TimetableAdapter.TimetableItem(baseContext, header, hours[k]))
+                    }
+                output.add(header)
+            }
+
+        return output
+    }
+
+    override fun setActionbarTitle(title: String) {
+        supportActionBar?.title = title
     }
 
     companion object {

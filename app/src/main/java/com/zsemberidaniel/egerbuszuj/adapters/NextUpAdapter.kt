@@ -16,7 +16,9 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 
 import org.joda.time.DateTime
+import org.joda.time.Hours
 import org.joda.time.LocalTime
+import org.joda.time.Period
 
 /**
  * Created by zsemberi.daniel on 2017. 05. 27..
@@ -43,17 +45,13 @@ class NextUpAdapter(items: MutableList<NextUpItem>?) : FlexibleAdapter<NextUpAda
                                     position: Int, payloads: MutableList<Any?>) {
             holder.headSignTextView.text = fullHeadSign
 
-            val now = DateTime.now()
+            val now = Period(DateTime.now(), time.toDateTimeToday())
 
             // How long the user would have to wait for the bus
-            var timeFromNow: String
-            if (time.hourOfDay == now.hourOfDay) {
-                if (time.minuteOfHour == now.minuteOfHour) timeFromNow = context.resources.getString(R.string.now)
-                else timeFromNow = "${time.minuteOfHour - now.minuteOfHour}${context.resources.getString(R.string.minuteShort)}"
-            } else {
-                timeFromNow = "${time.hourOfDay - now.hourOfDay}${context.resources.getString(R.string.hourShort)}" +
-                        "${time.minuteOfHour - now.minuteOfHour}${context.resources.getString(R.string.minuteShort)}"
-            }
+            val timeFromNow =
+            if (now.hours == 0 && now.minutes + 1 == 0 && now.seconds == 0) context.resources.getString(R.string.now)
+            else if (now.hours == 0) "${now.minutes + 1}${context.resources.getString(R.string.minuteShort)}"
+            else "${now.hours}${context.resources.getString(R.string.hourShort)}${now.minutes + 1}${context.resources.getString(R.string.minuteShort)}"
 
             holder.timeTextView.text = "${time.hourOfDay.formatToTwoDigits()}:${time.minuteOfHour.formatToTwoDigits()} - $timeFromNow"
         }

@@ -9,18 +9,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.view.animation.LinearInterpolator
-import android.view.animation.RotateAnimation
 import android.widget.*
 import com.zsemberidaniel.egerbuszuj.R
 import com.zsemberidaniel.egerbuszuj.activities.TimetableActivity
 import com.zsemberidaniel.egerbuszuj.adapters.RouteAdapter
 import com.zsemberidaniel.egerbuszuj.realm.RealmData
+import com.zsemberidaniel.egerbuszuj.realm.objects.Route
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import android.view.animation.LayoutAnimationController
-
-
-
 
 /**
  * Created by zsemberi.daniel on 2017. 05. 27..
@@ -45,8 +40,9 @@ class BothRouteFragment : Fragment() {
         routeRecyclerView = view.findViewById(R.id.routeRecyclerView) as RecyclerView
 
         // spinner
+        val routeComp = Route.getRouteComparator()
         val spinnerAdapter = ArrayAdapter<String>(view.context, R.layout.support_simple_spinner_dropdown_item,
-                RealmData.getAllRoutes().map { it.id }.sortedBy { it })
+                listOf("12"))
         routeSpinner.adapter = spinnerAdapter
 
         routeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

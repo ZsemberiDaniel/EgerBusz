@@ -5,14 +5,18 @@ import com.zsemberidaniel.egerbuszuj.realm.objects.Stop
 import com.zsemberidaniel.egerbuszuj.realm.objects.StopTime
 import com.zsemberidaniel.egerbuszuj.realm.objects.Trip
 import io.realm.Realm
+import io.realm.RealmResults
 
 /**
  * Created by zsemberi.daniel on 2017. 05. 27..
  */
 class RealmData {
     companion object {
-        fun getAllRoutes(): List<Route> =
-                Realm.getDefaultInstance().where(Route::class.java).distinct(Route.CN_ID).toList()
+        fun getAllRoutes(): RealmResults<Route> =
+                Realm.getDefaultInstance().where(Route::class.java).distinct(Route.CN_ID)
+
+        fun getAllRouteIds(): List<String> =
+                Realm.getDefaultInstance().where(Route::class.java).distinct(Route.CN_ID).map { it.id ?: "" }
 
         fun getAllStops(): List<Stop> =
                 Realm.getDefaultInstance().where(Stop::class.java).distinct(Stop.CN_ID)

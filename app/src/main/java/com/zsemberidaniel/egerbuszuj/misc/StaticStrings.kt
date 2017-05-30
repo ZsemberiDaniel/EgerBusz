@@ -6,4 +6,5 @@ package com.zsemberidaniel.egerbuszuj.misc
 
 object StaticStrings {
     val PREFS = "egerBuszZSDPreferences"
+    val SEPARATOR = "-"
 }
