@@ -93,7 +93,10 @@ class MainActivity : AppCompatActivity() {
 
         override fun getItem(position: Int): Fragment? {
             when (position) {
-                0 -> return ChooseStopFragment()
+                0 -> {
+                    chooseStopFragment = ChooseStopFragment()
+                    return chooseStopFragment
+                }
                 1 -> return BothRouteFragment()
                 else -> return null
             }

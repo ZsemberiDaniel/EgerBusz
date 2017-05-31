@@ -1,6 +1,7 @@
 package com.zsemberidaniel.egerbuszuj.adapters
 
 import android.support.v4.content.res.ResourcesCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -132,8 +133,9 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
             }
         }
 
-        override fun filter(constraint: String): Boolean
-                = stopName.toLowerCase().contains(constraint.toLowerCase())
+        override fun filter(constraint: String): Boolean {
+            return stopName.toLowerCase().contains(constraint.toLowerCase())
+        }
 
         /**
          * Sets the starred image of the given viewHolder correctly based on this class' starred
@@ -181,52 +183,6 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
 
         class ChooseStopHeaderViewHolder(view: View, adapter: FlexibleAdapter<*>) : FlexibleViewHolder(view, adapter, true) {
             val letterTextView: TextView = view.findViewById(R.id.letterTextView) as TextView
-        }
-    }
-
-    companion object {
-
-        /**
-         * Generates a header HashMap for the given stops. (Only includes the letter which the stops start
-         * with). It is a method to be used with the convertToChooseStopItems.
-         * @param stops The stops from which to get the starting characters.
-         * *
-         * @return A HashMap with uppercase Character keys and the headers.
-         */
-        fun getNewHeaders(stops: List<Stop>): HashMap<Char, ChooseStopHeader> {
-            val characters = HashSet<Char>()
-            characters.add('*')
-            val headers = HashMap<Char, ChooseStopHeader>()
-
-            for (stop in stops) characters.add(stop.name?.toUpperCase()?.get(0)!!)
-
-            for (letter in characters) headers.put(letter, ChooseStopHeader(letter))
-
-            return headers
-        }
-
-        /**
-         * Converts the given items to the ChoseStopItem GUI class so it can be added to FlexibleAdapter.
-         * It needs the letter headers which will be added to the FlexibleAdapter as well. They need to be
-         * in a HashMap. The keys are the characters (uppercase) and the values are the headers themselves.
-         * Keeps the order of the items.
-         * @param stops The stops to be converted
-         * *
-         * @param headers The letter headers to be added
-         * *
-         * @return The GUI items
-         */
-        fun convertToChooseStopItems(stops: List<Stop>,
-                                     headers: HashMap<Char, ChooseStopHeader>): TreeSet<ChooseStopItem> {
-            val items = TreeSet<ChooseStopItem>()
-            val starHeader = headers['*']
-
-            stops.mapTo(items) {
-                ChooseStopItem(headers[it.name?.toUpperCase()?.get(0)]!!,
-                        starHeader!!, it.id!!, it.name!!, it.isStarred)
-            }
-
-            return items
         }
     }
 }
