@@ -18,6 +18,13 @@ class RealmData {
         fun getAllRouteIds(): List<String> =
                 Realm.getDefaultInstance().where(Route::class.java).distinct(Route.CN_ID).map { it.id ?: "" }
 
+        fun getAllRouteIdsSorted(): List<String> =
+                Realm.getDefaultInstance()
+                        .where(Route::class.java)
+                        .distinct(Route.CN_ID)
+                        .map { it.id ?: "" }
+                        .sortedWith(Route.getRouteComparator())
+
         fun getAllStops(): List<Stop> =
                 Realm.getDefaultInstance().where(Stop::class.java).distinct(Stop.CN_ID)
 

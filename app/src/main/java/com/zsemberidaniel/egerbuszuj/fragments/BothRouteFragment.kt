@@ -5,22 +5,26 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.view.animation.RotateAnimation
 import android.widget.*
 import com.zsemberidaniel.egerbuszuj.R
 import com.zsemberidaniel.egerbuszuj.activities.TimetableActivity
 import com.zsemberidaniel.egerbuszuj.adapters.RouteAdapter
+import com.zsemberidaniel.egerbuszuj.interfaces.views.IBothRouteView
+import com.zsemberidaniel.egerbuszuj.presenters.BothRoutePresenter
 import com.zsemberidaniel.egerbuszuj.realm.RealmData
-import com.zsemberidaniel.egerbuszuj.realm.objects.Route
 import eu.davidea.flexibleadapter.FlexibleAdapter
 
 /**
  * Created by zsemberi.daniel on 2017. 05. 27..
  */
-class BothRouteFragment : Fragment() {
+class BothRouteFragment : Fragment(), IBothRouteView {
 
     private lateinit var routeSpinner: Spinner
     private lateinit var headSignTextView: TextView
@@ -29,7 +33,7 @@ class BothRouteFragment : Fragment() {
     private lateinit var routeRecyclerView: RecyclerView
     private lateinit var routeAdapter: RouteAdapter
 
-    private var direction: Int = 1
+    private lateinit var presenter: BothRoutePresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_both_route, container, false)
@@ -39,17 +43,19 @@ class BothRouteFragment : Fragment() {
         routeSpinner = view.findViewById(R.id.chooseRouteSpinner) as Spinner
         routeRecyclerView = view.findViewById(R.id.routeRecyclerView) as RecyclerView
 
+        presenter = BothRoutePresenter(this)
+        presenter.init()
+
         // spinner
-        val routeComp = Route.getRouteComparator()
         val spinnerAdapter = ArrayAdapter<String>(view.context, R.layout.support_simple_spinner_dropdown_item,
-                listOf("12"))
+                RealmData.getAllRouteIdsSorted())
         routeSpinner.adapter = spinnerAdapter
 
         routeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>) { }
 
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                reflectRouteOrDirectionChangeOnGUI(getChosenRoute(), direction)
+                presenter.routeChanged(routeSpinner.selectedItem.toString())
             }
 
         }
@@ -60,10 +66,27 @@ class BothRouteFragment : Fragment() {
 
         // add swap button click listener
         headSignSwapButton.setOnClickListener {
-            direction = 1 - direction
-            reflectRouteOrDirectionChangeOnGUI(getChosenRoute(), direction)
+            presenter.flipDirection()
 
-            val anim = AnimationUtils.loadAnimation(context, R.anim.image_view_rotation_180)
+            val from = headSignSwapButton.rotation % 360
+            val till = from + 180f
+            Log.i("TERT", "$from -> $till")
+            val anim = RotateAnimation(from, till, headSignSwapButton.pivotX, headSignSwapButton.pivotY)
+            anim.duration = 300
+            anim.fillAfter = true
+            anim.setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationRepeat(animation: Animation?) { }
+
+                override fun onAnimationEnd(animation: Animation?) {
+                    headSignSwapButton.rotation = till
+                    Log.i("TERT", "Anim ended rot is ${headSignSwapButton.rotation}")
+                }
+                override fun onAnimationStart(animation: Animation?) {
+                    headSignSwapButton.rotation = from
+                    Log.i("TERT", "Anim started rot is ${headSignSwapButton.rotation}")
+                }
+
+            })
             // val animController = LayoutAnimationController(anim, 0f)
 
             headSignSwapButton.startAnimation(anim)
@@ -72,16 +95,14 @@ class BothRouteFragment : Fragment() {
         return view
     }
 
-    fun getChosenRoute() = routeSpinner.selectedItem.toString()
+    fun getChosenRoute() = presenter.route
 
     /**
      * Updates the recyclerView and the head part.
      * Also adds new clickListeners
      */
-    fun reflectRouteOrDirectionChangeOnGUI(route: String, direction: Int) {
-        val items = RealmData.getAllStopsInOrder(route, direction).map { RouteAdapter.RouteAdapterItem(it!!) }.toMutableList()
-
-        headSignTextView.text = RealmData.getHeadSignOf(route, direction)
+    override fun updateAdapterItems(items: MutableList<RouteAdapter.RouteAdapterItem>, headSignText: String) {
+        headSignTextView.text = headSignText
 
         if (routeRecyclerView.adapter == null) {
             routeAdapter = RouteAdapter(items)
@@ -96,7 +117,7 @@ class BothRouteFragment : Fragment() {
 
             val intent = Intent(context, TimetableActivity::class.java)
             intent.putExtra(TimetableActivity.ARG_STOP_ID, item.stop.id)
-            intent.putExtra(TimetableActivity.ARG_ROUTE_ID, route)
+            intent.putExtra(TimetableActivity.ARG_ROUTE_ID, getChosenRoute())
             intent.putExtra(TimetableActivity.ARG_DIRECTION, 0)
             context.startActivity(intent)
 

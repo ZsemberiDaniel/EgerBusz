@@ -79,3 +79,6 @@ KYU	Kisfaludy út
 SAS	Sas út
 LDU	Lájer Dezső utca
 MLU	Mocsáry L. út
+ISK	Iskola út
+SZA	Szalapart út
+BLF	Berva LTP., forduló

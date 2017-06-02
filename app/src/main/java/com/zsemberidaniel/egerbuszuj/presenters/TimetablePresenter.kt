@@ -152,7 +152,7 @@ class TimetablePresenter(val view: ITimetableView, val filterRouteID: String?, v
 
         // Get all times in this stop on this route, today, in both directions
         // After the currTime hour, sorted by time
-        val times = getRealmQueryFor(filterStopID, filterRouteID, TodayType.todayType)
+        val times = getRealmQueryFor(filterStopID, filterRouteID, TodayType.todayType, filterDirection)
                 .filter {
                     (it.hour.toInt() == currTime.hourOfDay && it.minute >= currTime.minuteOfHour) ||
                      it.hour.toInt() > currTime.hourOfDay

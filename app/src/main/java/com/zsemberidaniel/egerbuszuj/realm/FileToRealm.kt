@@ -91,6 +91,7 @@ class FileToRealm {
                     reader = BufferedReader(InputStreamReader(context.assets.open(route + ".txt")))
                     Log.i("IO/I", "Reading from $route.txt")
 
+
                     BufferedReader(reader).use { reader ->
                         for (direction in 0..1) {
                             val headSign = reader.readLine()
@@ -108,19 +109,22 @@ class FileToRealm {
                             }
 
                             // Read and store the data first so we can make the tables with the times
-                            val stopCount = Integer.valueOf(reader.readLine())!!
+                            val stopCount = reader.readLine().toInt()
                             val types = Array(2) { IntArray(stopCount) }
-                            val stops = arrayOfNulls<String>(stopCount)
-                            for (i in 0..stopCount - 1) stops[i] = reader.readLine()
-                            for (i in 0..stopCount - 1) types[0][i] = Integer.valueOf(reader.readLine())!!
-                            for (i in 0..stopCount - 1) types[1][i] = Integer.valueOf(reader.readLine())!!
+                            val stops = arrayOfNulls<Stop>(stopCount)
+                            for (i in 0..stopCount - 1)
+                                stops[i] = realm.where(Stop::class.java)
+                                        .equalTo(Stop.CN_ID, reader.readLine()).findFirst()
+
+                            for (i in 0..stopCount - 1) types[0][i] = reader.readLine().toInt()
+                            for (i in 0..stopCount - 1) types[1][i] = reader.readLine().toInt()
 
                             // Read the times
                             var line: String? = reader.readLine()
                             var lineWords: Array<String>
                             var lineCounter = 0
-                            var hour: Byte = 0
-                            var type: Byte = 0
+                            var hour: Int = 0
+                            var type: Int = 0
 
 
                             while (line != "" && line != null) {
@@ -129,8 +133,8 @@ class FileToRealm {
                                     // The very first line of an hour: hour:type
                                     if (lineCounter % 5 == 0) {
                                         lineWords = line.split(":".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
-                                        hour = java.lang.Byte.valueOf(lineWords[0])!!
-                                        type = (java.lang.Byte.valueOf(lineWords[1])!! - 1).toByte()
+                                        hour = lineWords[0].toInt()
+                                        type = lineWords[1].toInt() - 1
                                     } else { // The other lines: min,min,min,min (...)
                                         lineWords = line.split(",".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
 
@@ -139,13 +143,13 @@ class FileToRealm {
                                             // Also go through all the minutes
                                             for (k in lineWords.indices) {
                                                 val stopTime = realm.createObject<StopTime>(StopTime::class.java)
-                                                stopTime.stop = realm.where<Stop>(Stop::class.java).equalTo(Stop.CN_ID, stops[i]).findFirst()
+                                                stopTime.stop = stops[i]
                                                 stopTime.trip = realm.where<Trip>(Trip::class.java)
                                                         .equalTo(Trip.CN_ID, route + (lineCounter % 5 - 1) + direction).findFirst()
-                                                stopTime.stopSequence = types[type.toInt()][i]
+                                                stopTime.stopSequence = types[type][i]
 
                                                 // calculate the correct minutes
-                                                val minutes = Integer.valueOf(lineWords[k])!! + types[type.toInt()][i]
+                                                val minutes = Integer.valueOf(lineWords[k])!! + types[type][i]
                                                 // if the minute goes above 60 we need to add Math.floor(minutes / 60d) to hour
                                                 stopTime.hour = (Math.floor(minutes / 60.0) + hour).toByte()
                                                 // if minute goes above 60 we need to trim it down to [0;60[
