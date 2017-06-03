@@ -1,16 +1,16 @@
 Szalapart felé
 11
-TIM
-SAS
-LDU
-MLU
-SBU
-SZI
-AUA
-DOG
-TUT
-ISK
-SZA
+TIM 1
+SAS 2
+LDU 2
+MLU 2
+SBU 1
+SZI 1
+AUA 1
+DOG 2
+TUT 2
+ISK 1
+SZA 1
 0
 1
 2
@@ -61,16 +61,16 @@ SZA
 
 Tihaméri malom felé
 10
-SZA
-ISK
-TUT
-DOG
-AUA
-BAZ
-SZI
-MAH
-HOU
-TIM
+SZA 1
+ISK 1
+TUT 1
+DOG 1
+AUA 2
+BAZ 2
+SZI 2
+MAH 1
+HOU 1
+TIM 1
 0
 1
 4

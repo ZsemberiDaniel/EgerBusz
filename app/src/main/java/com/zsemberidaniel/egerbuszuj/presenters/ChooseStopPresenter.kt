@@ -15,7 +15,7 @@ import java.util.TreeSet
 /**
  * Created by zsemberi.daniel on 2017. 05. 31..
  */
-class ChooseStopPresenter(val view: IChooseStopView) : IChooseStopPresenter {
+class ChooseStopPresenter(val view: IChooseStopView, val adapter: ChooseStopAdapter) : IChooseStopPresenter {
 
     private lateinit var allStopItems: TreeSet<ChooseStopAdapter.ChooseStopItem>
     private lateinit var allStops: List<Stop>

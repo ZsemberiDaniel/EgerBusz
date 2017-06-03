@@ -178,7 +178,7 @@ class TimetablePresenter(val view: ITimetableView, val filterRouteID: String?, v
         // Look for stopTimes with the given route, direction and dayType
         // This can be achieved with the proper trip id because that is made up of all of
         // that information
-        if (direction != null) times.equalTo(StopTime.CN_TRIP + "." + Trip.CN_DIRECTION, direction)
+        if (direction != null && direction != -1) times.equalTo(StopTime.CN_TRIP + "." + Trip.CN_DIRECTION, direction)
         times.equalTo(StopTime.CN_TRIP + "." + Trip.CN_DAY_TYPE, dayType)
         if (route != null) times.equalTo(StopTime.CN_TRIP + "." + Trip.CN_ROUTE + "." + Route.CN_ID, route)
         times.endGroup()

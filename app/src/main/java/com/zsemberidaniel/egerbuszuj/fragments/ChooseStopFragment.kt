@@ -26,15 +26,12 @@ class ChooseStopFragment : Fragment(), IChooseStopView {
     private lateinit var recyclerView: RecyclerView
     private lateinit var layoutManager: RecyclerView.LayoutManager
 
-    private lateinit var allStopsAdapter: FlexibleAdapter<ChooseStopAdapter.ChooseStopItem>
+    private lateinit var allStopsAdapter: ChooseStopAdapter
 
     private lateinit var presenter: ChooseStopPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.choose_stop, container, false)
-
-        presenter = ChooseStopPresenter(this)
-        presenter.init()
 
         recyclerView = view.findViewById(R.id.chooseStopRecyclerView) as RecyclerView
 
@@ -48,6 +45,9 @@ class ChooseStopFragment : Fragment(), IChooseStopView {
         allStopsAdapter = ChooseStopAdapter(ArrayList<ChooseStopAdapter.ChooseStopItem>())
         allStopsAdapter.setDisplayHeadersAtStartUp(true)
         allStopsAdapter.setStickyHeaders(true)
+
+        presenter = ChooseStopPresenter(this, allStopsAdapter)
+        presenter.init()
 
         allStopsAdapter.addListener(FlexibleAdapter.OnItemClickListener { position ->
             presenter.stopClicked(context, allStopsAdapter.getItem(position))

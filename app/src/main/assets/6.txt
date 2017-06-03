@@ -1,14 +1,14 @@
 Tihaméri malom felé
 9
-LAV
-AVZ
-ARU
-NAU
-GAU
-VBU
-MAH
-HOU
-TIM
+LAV 1
+AVZ 1
+ARU 1
+NAU 1
+GAU 1
+VBU 1
+MAH 1
+HOU 1
+TIM 1
 0
 1
 3
@@ -65,18 +65,18 @@ TIM
 
 Lajosváros felé
 12
-TIM
-HOU
-MAH
-VBU
-SET
-GAU
-NAU
-ARU
-AVZ
-VPU
-MKU
-LAV
+TIM 1
+HOU 2
+MAH 2
+VBU 2
+SET 1
+GAU 2
+NAU 2
+ARU 2
+AVZ 2
+VPU 1
+MKU 1
+LAV 1
 0
 1
 3

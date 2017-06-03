@@ -1,13 +1,13 @@
 Autóbusz-állomás, 6. kocsiállás - Tihaméri malom
 8
-AUA
-BAZ
-EGY
-EGH
-USZ
-MAH
-HOU
-TIM
+AUA 2
+BAZ 2
+EGY 1
+EGH 1
+USZ 1
+MAH 1
+HOU 1
+TIM 1
 0
 1
 2

@@ -28,7 +28,7 @@ import io.realm.Realm
  * Created by zsemberi.daniel on 2017. 05. 12..
  */
 
-class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem>)
+class ChooseStopAdapter(val items: MutableList<ChooseStopAdapter.ChooseStopItem>)
     : FlexibleAdapter<ChooseStopAdapter.ChooseStopItem>(ArrayList(items)) {
 
     private var filter: String = ""
@@ -56,6 +56,23 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
         // update display
         setNotifyMoveOfFilteredItems(true)
         super.updateDataSet(ArrayList(items), true)
+    }
+
+    override fun clear() {
+        super.clear()
+        items.clear()
+    }
+    override fun addItem(item: ChooseStopItem): Boolean {
+        items.add(item)
+        return super.addItem(item)
+    }
+    override fun addItem(position: Int, item: ChooseStopItem): Boolean {
+        items.add(0, item)
+        return super.addItem(position, item)
+    }
+    override fun addItems(position: Int, items: MutableList<ChooseStopItem>): Boolean {
+        this.items.addAll(0, items)
+        return super.addItems(position, items)
     }
 
     /**
@@ -99,9 +116,9 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
                                       parent: ViewGroup?): ChooseStopItemViewHolder
                 = ChooseStopItemViewHolder(inflater!!.inflate(layoutRes, parent, false), adapter)
 
-        override fun bindViewHolder(adapter: FlexibleAdapter<*>?, holder: ChooseStopItemViewHolder?, position: Int,
-                                    payloads: List<*>?) {
-            holder!!.stopNameTextView.text = stopName
+        override fun bindViewHolder(adapter: FlexibleAdapter<*>, holder: ChooseStopItemViewHolder, position: Int,
+                                    payloads: List<*>) {
+            holder.stopNameTextView.text = stopName
             setStarredImageCorrectly(holder)
 
             // setup on click listener for the starred image
@@ -110,12 +127,9 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
                 Realm.getDefaultInstance().executeTransaction { realm ->
                     val stop = realm.where<Stop>(Stop::class.java).equalTo(Stop.CN_ID, stopId).findFirst()
 
-                    stop.isStarred = !stop.isStarred
+                    isStarred = if (isStarred) false else true
+                    stop.isStarred = isStarred
                 }
-
-                // update the starred boolean here
-                isStarred = Realm.getDefaultInstance().where<Stop>(Stop::class.java).equalTo(Stop.CN_ID, stopId)
-                        .findFirst().isStarred
 
                 // update display
                 setStarredImageCorrectly(holder)
@@ -124,12 +138,10 @@ class ChooseStopAdapter(private val items: List<ChooseStopAdapter.ChooseStopItem
                 else
                     setHeader(letterHeader)
 
-                val chooseStopAdapter = adapter as ChooseStopAdapter?
-
                 // only update and sort the data set if it is not filtered because if it is filtered
                 // it updates it in a way which displays all of the data
-                if (!chooseStopAdapter!!.isFiltered)
-                    chooseStopAdapter.updateAndSortDataSet()
+                if (adapter is ChooseStopAdapter && !adapter.isFiltered)
+                    adapter.updateAndSortDataSet()
             }
         }
 

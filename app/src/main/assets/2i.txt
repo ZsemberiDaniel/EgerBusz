@@ -1,10 +1,10 @@
 Autóbusz-állomás (helyi járati megálló) - Szalapart
 5
-AUA
-DOG
-TUT
-ISK
-SZA
+AUA 1
+DOG 2
+TUT 2
+ISK 2
+SZA 1
 0
 2
 4

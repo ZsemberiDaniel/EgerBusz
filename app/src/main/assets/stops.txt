@@ -1,84 +1,84 @@
-LAV Lajosváros
-AVZ Agria Volán Zrt.
-ARU Aradi út
-NAU Nagyváradi út
-GAU Galagonyás utca
-VBU Vasútállomás bejárati út
-SBU Sportpálya bejárati út
-SZI Színház
-AUA Autóbusz-állomás
-DOG Dobó Gimnázium
-TUT Tűzoltó tér
-MAU Malom út
-HOK Hőközpont
-SHK Shell kút
-CIU Cifrakapu út
-TEA Tesco áruház
-RAT Ráckapu tér
-GAH Garzon ház
-KOT Kővágó tér
-NAL Nagylapos
-EGU Egri út
-FEA Felnémet, Aut.vt.
-ALU Alvégi utca
-KJU Kovács Jakab út
-FEU Felvégi út
-PAL Pásztorvölgy lakótelep
-FEB Felnémet, Béke út
-JAU József Attila utca
-FUT Fűrésztelep
-SAU Sánc út
-BEU Bervai út
-KBU Kőbánya bejáró út
-BER Berva
-TIU Tiba utca
-FEV Felsőváros
-BAZ Bazilika
-SET Széna tér
-VPU	Veres Péter út
-MKU	Mátyás király út
-KOU	Koháry út 35.
-AGP	Agria Park
-BAU	Bartakovics út
-KIT	Kisasszony temető
-TIH	Tiszti házak
-CSU	Csokonai út
-BKU	Baktai út
-VAS	Vasútállomás
-SZU	Szövetkezet út
-HMK	HM-i kamara
-IPP	Ipari park
-AGR	Agroker
-TRT	Tranzit tüzép
-KU5	Kistályai út 50.
-SKK	Schön Kaev KFT.
-ZFH	ZF Hungaria KFT.
-TIM	Tihaméri malom
-HOU	Homok utca
-MAH	Maklári hóstya
-SZT	Szarvas tér
-EGY	Egyetem
-EGH	Egészségház út
-USZ	Uszoda
-VEV	Vécsey völgy forduló
-ECU	Egri csillagok utca
-EVV	Eger, vár V. MH.
-TTV	Tetemvár út
-BTS	Bazilika (Törvényszék)
-HVT	Hatvani temető
-BGU	Bethlen Gábor út
-PFU	Petőfi út
-GYU	Garay út
-RDU	Radnóti út
-LTU	Laktanya utca
-VMU	Váci Mihály utca
-AJU	Ankli József út
-MIU	Mikes Kelemen út
-VKB	Vak Bottyán út
-KYU	Kisfaludy út
-SAS	Sas út
-LDU	Lájer Dezső utca
-MLU	Mocsáry L. út
-ISK	Iskola út
-SZA	Szalapart út
-BLF	Berva LTP., forduló
+AGP%Agria Park%dél%20.367315%47.898432%észak%20.367319%47.89995%kelet%20.368526%47.898974
+AVZ%Agria Volán Zrt.%belváros%20.382379%47.876669%lajosváros%20.381979%47.877141
+AGR%Agroker%minden%20.404182%47.869303
+ALU%Alvégi utca%dél%20.365172%47.938184%észak%20.365528%47.937523
+AJU%Ankli József út%minden%20.357287%47.905495
+ARU%Aradi út%belváros%20.381842%47.880261%lajosváros%20.381719%47.878988
+AUA%Autóbusz-állomás%tesco%20.370619%47.901162%lajosáros%20.370603%47.900536
+BKU%Baktai út%7%20.363536%47.905559%minden%20.363416%47.905628
+BAU%Bartakovics út%dél%20.366318%47.904564%észak%20.366617%47.904822
+BAZ%Bazilika%nyugat%20.37007%47.899129%lajosváros%20.372518%47.898868
+BTS%Bazilika (Törvényszék)%nyugat%20.37007%47.899129%lajosváros%20.372518%47.898868
+BER%Berva%minden%20.380443%47.962673
+BLF%Berva LTP., forduló%minden%20.374855%47.948992
+BEU%Bervai út%belváros%20.375514%47.949592%berva%20.375785%47.949492
+BGU%Bethlen Gábor út%minden%20.364198%47.896556
+CIU%Cifrakapu út%minden%20.37088%47.921191
+CSU%Csokonai út%dél%20.360094%47.905329%észak%20.359961%47.905577
+DOG%Dobó Gimnázium%lajosváros%20.372991%47.903427%tesco%20.372923%47.904254
+EVV%Eger, vár V. MH.%belváros%20.381359%47.908167%vécsey völgy%20.381693%47.908113
+EGH%Egészségház út%minden%20.379464%47.899405
+ECU%Egri csillagok utca%belváros%20.385692%47.909919%vécsey völgy%20.386601%47.909879
+EGU%Egri út%belváros%20.368434%47.927145%berva%20.36872%47.92767
+EGY%Egyetem%kelet%20.368434%47.927145%nyugat%20.36872%47.92767
+FEA%Felnémet, Aut.vt.%belváros%20.368434%47.927145%berva%20.36872%47.92767
+FEB%Felnémet, Béke út%minden%20.359274%47.935899
+FEV%Felsőváros%belváros%20.373629%47.919866%tesco%20.372671%47.920872
+FEU%Felvégi út%kelet%20.359909%47.941281%nyugat%20.36024%47.941541
+FUT%Fűrésztelep%berva%20.372711%47.93951%belváros%20.371593%47.938814
+GAU%Galagonyás utca%belváros%20.380581%47.888272%lajosváros%20.380602%47.886102
+GYU%Garay út%minden%20.362586%47.90148
+GAH%Garzon ház%belváros%20.370218%47.911364%berva%20.370373%47.912901
+HVT%Hatvani temető%dél%20.364871%47.895353%észak%20.365087%47.895511
+HMK%HM-i kamara%dél%20.388216%47.871496%észak%20.388332%47.872383
+HOU%Homok utca%agroker%20.391844%47.891388%belváros%20.391791%47.891677
+HOK%Hőközpont%kelet%20.373354%47.914646%nyugat%20.371163%47.91463%dél%20.372415%47.913913
+IPP%Ipari park%12Y%20.396452%47.873565%8%20.39637%47.873985
+ISK%Iskola út%belváros%20.364876%47.913546%szalapart%20.36538%47.913493
+JAU%József Attila utca%minden%20.365271%47.936262
+KIT%Kisasszony temető%dél%20.36608%47.907848%észak%20.366486%47.907827%kelet%20.365545%47.908443
+KYU%Kisfaludy út%minden%20.362715%47.90173
+KU5%Kistályai út 50.%agroker%20.400164%47.877739%belváros%20.400251%47.878266
+KOU%Koháry út 35.%lajosváros%20.370891%47.893309%tesco%20.370776%47.893813
+KJU%Kovács Jakab út%dél%20.365313%47.940911%észak%20.365576%47.940813
+KBU%Kőbánya bejáró út%belváros%20.374775%47.955274%berva%20.374926%47.955829
+KOT%Kővágó tér%belváros%20.369807%47.914282%berva%20.370041%47.915545
+LDU%Lájer Dezső utca%dél%20.38578%47.891801%észak%20.385809%47.891901
+LAV%Lajosváros%minden%20.383358%47.872529
+LTU%Laktanya utca%minden%20.357607%47.903436
+MAH%Maklári hóstya%agroker%20.387956%47.895%belváros%20.386967%47.896097%nyugat%20.385426%47.895383
+MAU%Malom út%belváros%20.372278%47.909417%tesco%20.373011%47.910564%vécsey völgy%20.373372%47.909462
+MKU%Mátyás király út%minden%20.382705%47.872633
+MIU%Mikes Kelemen út%minden%20.358643%47.90383
+MLU%Mocsáry L. út%dél%20.383607%47.894411%észak%20.38355%47.89465
+NAL%Nagylapos%belváros%20.36871%47.924858%berva%20.369026%47.925289
+NAU%Nagyváradi út%belváros%20.38125%47.884028%lajosváros%20.381166%47.882933
+PAL%Pásztorvölgy lakótelep%dél%20.359599%47.938339%észak%20.359934%47.939276
+PFU%Petőfi út%dél%20.36401%47.899106%észak%20.364257%47.899312
+RAT%Ráckapu tér%minden%20.371138%47.909875
+RDU%Radnóti út%midnen%20.359071%47.901624
+SAU%Sánc út%belváros%20.374784%47.941409%berva%20.375575%47.941726
+SAS%Sas út%dél%20.387748%47.888628%észak%20.387848%47.888834
+SKK%Schön Kaev KFT.%agroker%20.399215%47.880305%belváros%20.399472%47.880286
+SHK%Shell kút%belváros%20.36914%47.920564%berva%20.369598%47.919617
+SBU%Sportpálya bejárati út%minden%20.375914%47.894971
+SZA%Szalapart út%minden%20.363371%47.914923
+SZT%Szarvas tér%minden%20.382299%47.901167
+SET%Széna tér%minden%20.380128%47.889381
+SZI%Színház%belváros%20.374559%47.898084%lajosváros%20.37492%47.896275
+SZU%Szövetkezet út%dél%20.387698%47.874272%észak%20.387844%47.875216
+TEA%Tesco áruház%minden%20.370713%47.923221
+TTV%Tetemvár út%belváros%20.378582%47.909049%vécsey völgy%20.378529%47.908733
+TIU%Tiba utca%belváros%20.376084%47.91576%tesco%20.376244%47.91622
+TIM%Tihaméri malom%2, 2A, 5A, 6%20.395505%47.888444%agroker%20.395668%47.8881%nyugat%20.394692%47.887672
+TIH%Tiszti házak%dél%20.359506%47.908493%észak%20.359869%47.908514
+TRT%Tranzit tüzép%agroker%20.401613%47.874353%belváros%20.401705%47.874503
+TUT%Tűzoltó tér%lajosváros%20.371772%47.906461%tesco%20.371966%47.907002
+USZ%Uszoda%minden%20.382734%47.899027
+VMU%Váci Mihály utca%minden%20.357015%47.904282
+VKB%Vak Bottyán út%minden%20.359689%47.902094
+VAS%Vasútállomás%minden%20.381117%47.891571
+VBU%Vasútállomás bejárati út%belváros%20.379808%47.890853%lajosváros%20.378176%47.892141
+VEV%Vécsey völgy forduló%minden%20.395094%47.910724
+VPU%Veres Péter út%minden%20.382247%47.875098
+ZFH%ZF Hungaria KFT.%belváros%20.397647%47.88607%agroker%20.397727%47.885254

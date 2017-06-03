@@ -16,7 +16,6 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 
 import org.joda.time.DateTime
-import org.joda.time.Hours
 import org.joda.time.LocalTime
 import org.joda.time.Period
 
@@ -49,7 +48,7 @@ class NextUpAdapter(items: MutableList<NextUpItem>?) : FlexibleAdapter<NextUpAda
 
             // How long the user would have to wait for the bus
             val timeFromNow =
-            if (now.hours == 0 && now.minutes + 1 == 0 && now.seconds == 0) context.resources.getString(R.string.now)
+            if (now.hours == 0 && now.minutes + 1 == 0) context.resources.getString(R.string.now)
             else if (now.hours == 0) "${now.minutes + 1}${context.resources.getString(R.string.minuteShort)}"
             else "${now.hours}${context.resources.getString(R.string.hourShort)}${now.minutes + 1}${context.resources.getString(R.string.minuteShort)}"
 

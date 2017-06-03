@@ -51,10 +51,12 @@ class FileToRealm {
 
                 BufferedReader(reader).use { reader ->
                     reader.lineSequence().forEach {
+                        val line = it.split("%")
+
                         // A line looks like: IDI Name of stop
                         val stop = realm.createObject<Stop>(Stop::class.java)
-                        stop.id = it.substring(0, 3)
-                        stop.name = it.substring(4)
+                        stop.id = line[0]
+                        stop.name = line[1]
                         stop.isStarred = false
                     }
                 }
@@ -112,9 +114,12 @@ class FileToRealm {
                             val stopCount = reader.readLine().toInt()
                             val types = Array(2) { IntArray(stopCount) }
                             val stops = arrayOfNulls<Stop>(stopCount)
-                            for (i in 0..stopCount - 1)
+                            for (i in 0..stopCount - 1) {
+                                val line = reader.readLine().split(" ")
+
                                 stops[i] = realm.where(Stop::class.java)
-                                        .equalTo(Stop.CN_ID, reader.readLine()).findFirst()
+                                        .equalTo(Stop.CN_ID, line[0]).findFirst()
+                            }
 
                             for (i in 0..stopCount - 1) types[0][i] = reader.readLine().toInt()
                             for (i in 0..stopCount - 1) types[1][i] = reader.readLine().toInt()
